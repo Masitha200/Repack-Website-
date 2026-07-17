@@ -18,6 +18,26 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
     let urlPath = req.url.split('?')[0]; // strip query patterns
+
+    if (urlPath === '/api/free-games') {
+        const epicApiUrl = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US";
+        const https = require('https');
+        https.get(epicApiUrl, (apiRes) => {
+            let body = '';
+            res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            });
+            apiRes.on('data', (chunk) => { body += chunk; });
+            apiRes.on('end', () => { res.end(body); });
+        }).on('error', (e) => {
+            console.error(`Error fetching free games: ${e.message}`);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: e.message }));
+        });
+        return;
+    }
+
     let filePath = path.join(__dirname, urlPath === '/' ? 'index.html' : urlPath);
 
     const extname = path.extname(filePath);

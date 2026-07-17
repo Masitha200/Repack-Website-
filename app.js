@@ -574,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
         upcomingFreeGrid.innerHTML = "";
 
         try {
-            const EPIC_API = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US";
+            const EPIC_API = "/api/free-games";
             const res = await fetch(EPIC_API);
             if (!res.ok) throw new Error("API error");
             const data = await res.json();
@@ -1074,6 +1074,19 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             showToast("🎮 Connected online! Free game giveaways synchronized.", "success");
         }, 1800);
+    }
+
+    // Donation Simulator Submission
+    const donationForm = document.getElementById("donation-simulator-form");
+    if (donationForm) {
+        donationForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const name = document.getElementById("donate-user-name").value;
+            const amount = document.getElementById("donate-user-amount").value;
+            showToast(`💖 Thank you ${name} for simulating a donation of $${amount}! Receipt notification completed!`, "success");
+            // Clear input
+            document.getElementById("donate-user-name").value = "";
+        });
     }
 
     initializeAll();

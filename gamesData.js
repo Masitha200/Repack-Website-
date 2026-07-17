@@ -980,6 +980,36 @@ const GAMES_DATA = {
             status: "Upcoming",
             daysAgo: "Upcoming Release",
             statusClass: "status-upcoming"
+        },
+        {
+            id: "ac-black-flag-remake-timeline",
+            title: "Assassin's Creed IV: Black Flag Remake",
+            releaseDate: "2026-07-17",
+            category: "Action",
+            protection: "Ubisoft Connect DRM + Hypervisor",
+            status: "Cracked",
+            daysAgo: "Cracked",
+            statusClass: "status-cracked"
+        },
+        {
+            id: "ac-mirage-timeline",
+            title: "Assassin's Creed Mirage",
+            releaseDate: "2023-10-05",
+            category: "Action",
+            protection: "Denuvo (Bypassed)",
+            status: "Cracked",
+            daysAgo: "Cracked",
+            statusClass: "status-cracked"
+        },
+        {
+            id: "ac-shadows-timeline",
+            title: "Assassin's Creed Shadows",
+            releaseDate: "2025-02-14",
+            category: "Action",
+            protection: "Denuvo (Bypassed)",
+            status: "Cracked",
+            daysAgo: "Cracked",
+            statusClass: "status-cracked"
         }
     ],
 
@@ -1090,9 +1120,22 @@ const GAMES_DATA = {
         ["Civilization VI", 289070, "Strategy", "Firaxis Games", "16 GB", "CODEX"],
         ["Star Wars Jedi: Fallen Order", 1172380, "Action", "Respawn", "55 GB", "CODEX"],
         ["Star Wars Jedi: Survivor", 1774580, "Action", "Respawn", "155 GB", "RUNE"],
-        ["Assassin's Creed Valhalla", 2208920, "RPG", "Ubisoft", "130 GB", "EMPRESS"],
-        ["Assassin's Creed Odyssey", 812140, "RPG", "Ubisoft", "80 GB", "EMPRESS"],
+        ["Assassin's Creed", 15100, "Action", "Ubisoft", "8 GB", "RELOADED"],
+        ["Assassin's Creed II", 33230, "Action", "Ubisoft", "12 GB", "SKIDROW"],
+        ["Assassin's Creed Brotherhood", 48190, "Action", "Ubisoft", "12 GB", "SKIDROW"],
+        ["Assassin's Creed Revelations", 201870, "Action", "Ubisoft", "12 GB", "SKIDROW"],
+        ["Assassin's Creed III Remastered", 911400, "Action", "Ubisoft", "45 GB", "CODEX"],
+        ["Assassin's Creed IV Black Flag", 242050, "Action", "Ubisoft", "30 GB", "RELOADED"],
+        ["Assassin's Creed IV: Black Flag Remake", 242050, "Action", "Ubisoft", "60 GB", "Hypervisor"],
+        ["Assassin's Creed Liberation HD", 260210, "Action", "Ubisoft", "6 GB", "SKIDROW"],
+        ["Assassin's Creed Rogue", 311560, "Action", "Ubisoft", "12 GB", "CODEX"],
+        ["Assassin's Creed Unity", 289650, "Action", "Ubisoft", "50 GB", "RELOADED"],
+        ["Assassin's Creed Syndicate", 368500, "Action", "Ubisoft", "50 GB", "CODEX"],
         ["Assassin's Creed Origins", 582160, "RPG", "Ubisoft", "60 GB", "CODEX"],
+        ["Assassin's Creed Odyssey", 812140, "RPG", "Ubisoft", "80 GB", "EMPRESS"],
+        ["Assassin's Creed Valhalla", 2208920, "RPG", "Ubisoft", "130 GB", "EMPRESS"],
+        ["Assassin's Creed Mirage", 2333900, "Action", "Ubisoft", "40 GB", "Delusional"],
+        ["Assassin's Creed Shadows", 2266850, "Action", "Ubisoft", "70 GB", "RUNE"],
         ["Watch Dogs 2", 447040, "Action", "Ubisoft", "40 GB", "CODEX"],
         ["Far Cry 6", 1876850, "Action", "Ubisoft", "90 GB", "EMPRESS"],
         ["Far Cry 5", 552520, "Action", "Ubisoft", "45 GB", "CODEX"],
@@ -1327,10 +1370,13 @@ const GAMES_DATA = {
             id: slug,
             title: title,
             bgClass: "card-seeded",
-            imgUrl: title.includes("FC 26") ? "fc26_header.jpg"
-                : title.includes("Cricket 22") ? "cricket22_header.jpg"
-                    : title.includes("Cricket 26") ? "cricket26_header.jpg"
-                        : `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
+            imgUrl: title.includes("Far Cry 6") ? "fc6_header.png"
+                : title.includes("Mirage") ? "mirage_header.png"
+                    : title.includes("Shadows") ? "shadows_header.png"
+                        : title.includes("FC 26") ? "fc26_header.jpg"
+                            : title.includes("Cricket 22") ? "cricket22_header.jpg"
+                                : title.includes("Cricket 26") ? "cricket26_header.jpg"
+                                    : `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
             category: cat,
             releaseDate: "2022-01-01",
             crackDate: isCracked ? "2022-01-02" : "Pending",
@@ -1364,6 +1410,24 @@ const GAMES_DATA = {
     if (cricket26Entry) {
         cricket26Entry.downloads.direct = "https://gamedrive.org/?s=Cricket+26";
         cricket26Entry.crackDate = "2026-07-01";
+    }
+
+    const acBlackFlagRemakeEntry = GAMES_DATA.games.find(g => g.id === "assassin-s-creed-iv-black-flag-remake");
+    if (acBlackFlagRemakeEntry) {
+        acBlackFlagRemakeEntry.downloads.direct = "https://gamedrive.org/?s=Assassins+Creed+IV+Black+Flag+Remake";
+        acBlackFlagRemakeEntry.crackDate = "2026-07-17";
+    }
+
+    const mirageEntry = GAMES_DATA.games.find(g => g.id === "assassin-s-creed-mirage");
+    if (mirageEntry) {
+        mirageEntry.downloads.direct = "https://gamedrive.org/?s=Assassins+Creed+Mirage";
+        mirageEntry.crackDate = "2026-07-17";
+    }
+
+    const shadowsEntry = GAMES_DATA.games.find(g => g.id === "assassin-s-creed-shadows");
+    if (shadowsEntry) {
+        shadowsEntry.downloads.direct = "https://gamedrive.org/?s=Assassins+Creed+Shadows";
+        shadowsEntry.crackDate = "2026-07-17";
     }
 
 })();

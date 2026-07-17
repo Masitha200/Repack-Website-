@@ -58,6 +58,9 @@
                                 class="fa-solid fa-circle-question"></i> Community Requests</a></li>
                     <li><a href="#hypervisor" class="nav-link" data-target="hypervisor"><i
                                 class="fa-solid fa-microchip"></i> Hypervisor Guide</a></li>
+                    <li><a href="#support" class="nav-link" data-target="support"
+                            style="color: var(--accent-pink); font-weight: 600;"><i class="fa-solid fa-heart"></i>
+                            Support Me</a></li>
                 </ul>
             </nav>
 
@@ -156,6 +159,24 @@
                     <div class="news-list" id="quick-news-feed">
                         <h3>Latest News</h3>
                         <!-- Filled by JS -->
+                    </div>
+
+                    <!-- Call To Action: Support/Donations -->
+                    <div
+                        style="background: rgba(236, 72, 153, 0.08); border: 1px dashed rgba(236, 72, 153, 0.3); border-radius: 8px; padding: 1rem; margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fa-solid fa-heart"
+                                style="color: var(--accent-pink); font-size: 1.5rem; animation: heartPulse 1.5s infinite ease-in-out;"></i>
+                            <div>
+                                <strong style="color: #fff; font-size: 0.9rem;">Support the Developer!</strong>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Help us host
+                                    servers and maintain database updates daily!</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-small" onclick="tabNavigation('support')"
+                            style="background: var(--accent-pink); border-color: var(--accent-pink); white-space: nowrap;">
+                            <i class="fa-solid fa-heart"></i> Donate Now
+                        </button>
                     </div>
                 </div>
 
@@ -518,6 +539,156 @@
             </div>
         </section>
 
+        <!-- 7. SUPPORT SECTION -->
+        <section id="view-support" class="view-section">
+            <div class="section-header-banner">
+                <h1><i class="fa-solid fa-heart" style="color: var(--accent-pink);"></i> Support & Donations</h1>
+                <p>NeoPlay is a free-to-use, community-driven portal operated by a single developer. Consider supporting
+                    to keep servers online and databases updated.</p>
+            </div>
+
+            <!-- Main grid layout -->
+            <div class="requests-grid-layout" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;">
+
+                <!-- Left panel: Donation methods -->
+                <div class="timeline-panel"
+                    style="background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1.8rem;">
+                    <h2><i class="fa-solid fa-credit-card"></i> Donation Methods</h2>
+                    <p style="line-height: 1.6; color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                        Select your preferred donation channel from the options below. All contributions directly
+                        support server hosting, automated API scripts, and domain registration costs.
+                    </p>
+
+                    <!-- Methods Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <!-- Buy Me a Coffee -->
+                        <div style="background: var(--bg-tertiary); border: 1px solid var(--border-glass); border-radius: 10px; padding: 1.25rem; text-align: center; cursor: pointer; transition: 0.3s;"
+                            onmouseover="this.style.borderColor='var(--accent-pink)';"
+                            onmouseout="this.style.borderColor='var(--border-glass)';">
+                            <i class="fa-solid fa-mug-hot"
+                                style="font-size: 2.2rem; color: #ffdd00; margin-bottom: 0.8rem;"></i>
+                            <h4 style="margin-bottom: 0.4rem; color: #fff;">Buy Me A Coffee</h4>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Support
+                                directly with one-off donations.</p>
+                            <a href="https://buymeacoffee.com/masitha" target="_blank" class="btn btn-primary btn-small"
+                                style="background: #ffdd00; color: #000; font-weight: 700; width: 100%;">buymeacoffee
+                                &rarr;</a>
+                        </div>
+
+                        <!-- Patreon -->
+                        <div style="background: var(--bg-tertiary); border: 1px solid var(--border-glass); border-radius: 10px; padding: 1.25rem; text-align: center; cursor: pointer; transition: 0.3s;"
+                            onmouseover="this.style.borderColor='var(--accent-pink)';"
+                            onmouseout="this.style.borderColor='var(--border-glass)';">
+                            <i class="fa-brands fa-patreon"
+                                style="font-size: 2.2rem; color: #f96854; margin-bottom: 0.8rem;"></i>
+                            <h4 style="margin-bottom: 0.4rem; color: #fff;">Patreon</h4>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Become a
+                                monthly member for exclusive privileges.</p>
+                            <a href="https://patreon.com/masitha" target="_blank" class="btn btn-primary btn-small"
+                                style="background: #f96854; color: #fff; font-weight: 700; width: 100%;">patreon
+                                &rarr;</a>
+                        </div>
+
+                        <!-- Cryptocurrencies -->
+                        <div
+                            style="background: var(--bg-tertiary); border: 1px solid var(--border-glass); border-radius: 10px; padding: 1.25rem; grid-column: span 2; text-align: left;">
+                            <h4 style="color: #fff; margin-bottom: 1rem;"><i class="fa-solid fa-wallet"
+                                    style="color: var(--accent-blue);"></i> Crypto Wallet Addresses</h4>
+
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- Bitcoin -->
+                                <div
+                                    style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-primary); padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fa-brands fa-bitcoin" style="color: #f7931a; font-size: 1.2rem;"></i>
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: #fff;">Bitcoin
+                                            (BTC)</span>
+                                    </div>
+                                    <code
+                                        style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">1AcBC4...flagREmKeM914</code>
+                                </div>
+                                <!-- Ethereum -->
+                                <div
+                                    style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-primary); padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fa-brands fa-ethereum" style="color: #627eea; font-size: 1.2rem;"></i>
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: #fff;">Ethereum
+                                            (ETH)</span>
+                                    </div>
+                                    <code
+                                        style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">0x7c3aed...06b6d4c99c</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right panel: Interactive mock donation form -->
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <!-- Donation Progress goal -->
+                    <div class="protection-panel"
+                        style="background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.8rem; color: #fff;"><i
+                                class="fa-solid fa-bullseye" style="color: var(--accent-pink);"></i> Server Cost Funding
+                        </h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">Our monthly
+                            server operational costs goal progress tracker.</p>
+
+                        <div
+                            style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: #fff;">
+                            <span>$125 Raised</span>
+                            <span>Target: $250 / Month</span>
+                        </div>
+                        <div
+                            style="background: var(--bg-primary); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 1rem; border: 1px solid var(--border-glass);">
+                            <div
+                                style="background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple)); width: 50%; height: 100%;">
+                            </div>
+                        </div>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);"><i class="fa-solid fa-sync fa-spin"
+                                style="margin-right: 4px;"></i> Live progress cached updates (July 2026)</span>
+                    </div>
+
+                    <!-- Simulator for donations -->
+                    <div class="protection-panel"
+                        style="background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.8rem; color: #fff;"><i
+                                class="fa-solid fa-terminal" style="color: var(--accent-pink);"></i> Mock Donation
+                            Simulator</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">Simulate a
+                            donation to see standard receipt notification workflow!</p>
+
+                        <form id="donation-simulator-form">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label
+                                    style="display: block; font-size: 0.8rem; margin-bottom: 0.4rem; color: #fff;">Your
+                                    Name *</label>
+                                <input type="text" id="donate-user-name" required
+                                    placeholder="e.g. Captain Jack Sparrow"
+                                    style="background: var(--bg-primary); border: 1px solid var(--border-glass); border-radius: 6px; padding: 0.5rem; width: 100%; color: #fff; font-size: 0.85rem;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label
+                                    style="display: block; font-size: 0.8rem; margin-bottom: 0.4rem; color: #fff;">Amount
+                                    ($) *</label>
+                                <select id="donate-user-amount"
+                                    style="background: var(--bg-primary); border: 1px solid var(--border-glass); border-radius: 6px; padding: 0.5rem; width: 100%; color: #fff; font-size: 0.85rem;">
+                                    <option value="5">$5 (Buy a Tea)</option>
+                                    <option value="10" selected>$10 (Buy a Coffee)</option>
+                                    <option value="25">$25 (Support Server 1-Week)</option>
+                                    <option value="50">$50 (Support Server 2-Weeks)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full-width btn-small"
+                                style="background: var(--accent-pink);">
+                                <i class="fa-solid fa-heart"></i> Simulate Donation Received
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Detailed Game Modal -->
@@ -562,6 +733,9 @@
                     <li><a href="#hypervisor" onclick="tabNavigation('hypervisor')"
                             style="color: var(--accent-blue); font-weight: 600;"><i class="fa-solid fa-microchip"></i>
                             Hypervisor Guide</a></li>
+                    <li><a href="#support" onclick="tabNavigation('support')"
+                            style="color: var(--accent-pink); font-weight: 600;"><i class="fa-solid fa-heart"></i>
+                            Support Me</a></li>
                 </ul>
             </div>
 

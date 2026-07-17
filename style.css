@@ -2030,3 +2030,22 @@ a {
 .instruction-step strong {
     color: var(--text-main);
 }
+
+/* Support Section Animations */
+@keyframes heartPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.12);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.nav-link[data-target="support"] i {
+    animation: heartPulse 2s infinite ease-in-out;
+}
