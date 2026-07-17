@@ -989,61 +989,37 @@ const GAMES_DATA = {
             id: "epic-1",
             store: "epic",
             type: "active",
-            title: "Death Stranding Director's Cut",
-            originalPrice: "$39.99",
+            title: "Echo Generation: Midnight Edition",
+            originalPrice: "$14.99",
             discount: "100% OFF",
-            startDate: "July 15, 2026",
-            endDate: "July 22, 2026",
-            url: "https://store.epicgames.com/",
-            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1850570/header.jpg"
+            startDate: "July 16, 2026",
+            endDate: "July 23, 2026",
+            url: "https://store.epicgames.com/en-US/p/echo-generation-midnight-edition",
+            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1705850/header.jpg"
         },
         {
             id: "epic-2",
             store: "epic",
             type: "active",
-            title: "A Plague Tale: Innocence",
-            originalPrice: "$39.99",
+            title: "Luto",
+            originalPrice: "$19.99",
             discount: "100% OFF",
-            startDate: "July 12, 2026",
-            endDate: "July 19, 2026",
-            url: "https://store.epicgames.com/",
-            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/752590/header.jpg"
-        },
-        {
-            id: "steam-1",
-            store: "steam",
-            type: "active",
-            title: "Minion Masters - Sand Wars DLC",
-            originalPrice: "$14.99",
-            discount: "100% OFF",
-            startDate: "July 12, 2026",
-            endDate: "July 19, 2026",
-            url: "https://store.steampowered.com/",
-            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/489830/header.jpg"
+            startDate: "July 16, 2026",
+            endDate: "July 23, 2026",
+            url: "https://store.epicgames.com/en-US/p/luto",
+            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1749670/header.jpg"
         },
         {
             id: "epic-upcoming-1",
             store: "epic",
             type: "upcoming",
-            title: "F.I.S.T.: Forged In Shadow Torch",
-            originalPrice: "$29.99",
+            title: "Foretales",
+            originalPrice: "$14.99",
             discount: "Free Next Week",
-            startDate: "July 19, 2026",
-            endDate: "July 26, 2026",
+            startDate: "July 23, 2026",
+            endDate: "July 30, 2026",
             url: "https://store.epicgames.com/",
-            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1364210/header.jpg"
-        },
-        {
-            id: "epic-upcoming-2",
-            store: "epic",
-            type: "upcoming",
-            title: "Duskers",
-            originalPrice: "$19.99",
-            discount: "Free Next Week",
-            startDate: "July 19, 2026",
-            endDate: "July 26, 2026",
-            url: "https://store.epicgames.com/",
-            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/386940/header.jpg"
+            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1556440/header.jpg"
         }
     ],
 
