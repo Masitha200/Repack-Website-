@@ -51,7 +51,7 @@
                     <li><a href="#cracks" class="nav-link" data-target="cracks"><i
                                 class="fa-solid fa-unlock-keyhole"></i> Cracked Games</a></li>
                     <li><a href="#releases" class="nav-link" data-target="releases"><i
-                                class="fa-solid fa-calendar-days"></i> New Releases</a></li>
+                                class="fa-solid fa-cart-shopping"></i> Premium Games</a></li>
                     <li><a href="#freebies" class="nav-link" data-target="freebies"><i class="fa-solid fa-gift"></i>
                             Free Games</a></li>
                     <li><a href="#requests" class="nav-link" data-target="requests"><i
@@ -261,68 +261,28 @@
         </section>
 
 
-        <!-- 3. NEW RELEASES VIEW -->
+        <!-- 3. PREMIUM GAMES VIEW -->
         <section id="view-releases" class="view-section">
             <div class="section-header-banner">
-                <h1><i class="fa-solid fa-calendar-days"></i> Newly Released & Upcoming Games</h1>
-                <p>Track the latest releases in the gaming world and check their crack protection and crack progress
-                    live.</p>
+                <h1><i class="fa-solid fa-cart-shopping"></i> Premium Games Store</h1>
+                <p>Buy your favorite games directly from the Steam Store at the best prices.</p>
             </div>
 
-            <div class="releases-container">
-                <!-- Left panel: Release Timeline -->
-                <div class="timeline-panel">
-                    <h2><i class="fa-regular fa-clock"></i> Recent & Upcoming Releases</h2>
-                    <div class="timeline-list" id="releases-timeline">
-                        <!-- Instantiated by JS -->
-                    </div>
-                </div>
+            <!-- Regional Pricing Disclaimer -->
+            <div class="info-note-banner"
+                style="background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin: 0 auto 1.5rem auto; font-size: 0.85rem; color: var(--text-main); display: flex; align-items: center; gap: 0.75rem; max-width: 1200px; width: 100%; box-sizing: border-box;">
+                <i class="fa-solid fa-circle-info"
+                    style="color: var(--status-cracked); font-size: 1.1rem; flex-shrink: 0;"></i>
+                <p style="margin: 0; line-height: 1.4;">
+                    <strong>Regional Pricing Note:</strong> Prices shown below are standard USD estimates. The final
+                    purchase price may vary based on your local Steam store region (e.g., LKR, USD, regional discounts)
+                    and active sales.
+                </p>
+            </div>
 
-                <!-- Right panel: Protection Status Summary -->
-                <div class="protection-panel">
-                    <div class="stats-card-gradient">
-                        <h3>DRM Protection Status</h3>
-                        <p>Current distribution of anti-tamper technologies in new releases.</p>
-                        <div class="drm-chart-container">
-                            <!-- Custom CSS-based charts -->
-                            <div class="drm-chart-row">
-                                <span class="drm-name">Denuvo v18+</span>
-                                <div class="drm-bar-wrapper">
-                                    <div class="drm-bar fill-denuvo" style="width: 55%"></div>
-                                </div>
-                                <span class="drm-perc">55%</span>
-                            </div>
-                            <div class="drm-chart-row">
-                                <span class="drm-name">Steam DRM</span>
-                                <div class="drm-bar-wrapper">
-                                    <div class="drm-bar fill-steam" style="width: 30%"></div>
-                                </div>
-                                <span class="drm-perc">30%</span>
-                            </div>
-                            <div class="drm-chart-row">
-                                <span class="drm-name">Epic EasyAntiCheat</span>
-                                <div class="drm-bar-wrapper">
-                                    <div class="drm-bar fill-eac" style="width: 10%"></div>
-                                </div>
-                                <span class="drm-perc">10%</span>
-                            </div>
-                            <div class="drm-chart-row">
-                                <span class="drm-name">DRM-Free (GOG)</span>
-                                <div class="drm-bar-wrapper">
-                                    <div class="drm-bar fill-gog" style="width: 5%"></div>
-                                </div>
-                                <span class="drm-perc">5%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="notable-un-cracked-card">
-                        <h3>Most Wanted Uncracked Games</h3>
-                        <ul class="un-cracked-list" id="un-cracked-list">
-                            <!-- JS filled -->
-                        </ul>
-                    </div>
-                </div>
+            <!-- Premium Games Grid -->
+            <div class="games-grid" id="premium-games-grid">
+                <!-- Filled dynamically by JS -->
             </div>
         </section>
 
@@ -728,7 +688,7 @@
                 <ul>
                     <li><a href="#home" onclick="tabNavigation('home')">Home Dashboard</a></li>
                     <li><a href="#cracks" onclick="tabNavigation('cracks')">Cracks Catalog</a></li>
-                    <li><a href="#releases" onclick="tabNavigation('releases')">Release Calendar</a></li>
+                    <li><a href="#releases" onclick="tabNavigation('releases')">Premium Games</a></li>
                     <li><a href="#freebies" onclick="tabNavigation('freebies')">Epic/Steam Freebies</a></li>
                     <li><a href="#hypervisor" onclick="tabNavigation('hypervisor')"
                             style="color: var(--accent-blue); font-weight: 600;"><i class="fa-solid fa-microchip"></i>

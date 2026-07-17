@@ -1347,7 +1347,35 @@ const GAMES_DATA = {
         ["Cricket 19", 1028630, "Simulation", "Big Ant Studios", "15 GB", "CODEX"],
         ["Cricket 22", 1498440, "Simulation", "Big Ant Studios", "25 GB", "FLT"],
         ["Cricket 24", 2358260, "Simulation", "Big Ant Studios", "30 GB", "RUNE"],
-        ["Cricket 26", 3468650, "Simulation", "Big Ant Studios", "35 GB", "RUNE"]
+        ["Cricket 26", 3468650, "Simulation", "Big Ant Studios", "35 GB", "RUNE"],
+        ["F1 2020", 1080110, "Racing", "Codemasters", "45 GB", "CODEX"],
+        ["F1 2021", 1135950, "Racing", "Codemasters", "50 GB", "CODEX"],
+        ["F1 22", 1692250, "Racing", "Codemasters / EA Sports", "55 GB", "Razor1911"],
+        ["F1 23", 2108330, "Racing", "Codemasters / EA Sports", "60 GB", "Razor1911"],
+        ["F1 24", 2488620, "Racing", "Codemasters / EA Sports", "65 GB", "Delusional"],
+        ["F1 25", 3120450, "Racing", "Codemasters / EA Sports", "70 GB", "Uncracked"],
+        ["The Planet Crafter", 1280730, "Survival", "Miju Games", "4 GB", "TENOKE"],
+        ["Grand Theft Auto III", 12100, "Action", "Rockstar Games", "1 GB", "HOODLUM"],
+        ["Grand Theft Auto: Vice City", 12110, "Action", "Rockstar Games", "1.5 GB", "HOODLUM"],
+        ["Grand Theft Auto: San Andreas", 12120, "Action", "Rockstar Games", "4 GB", "HOODLUM"],
+        ["Grand Theft Auto IV", 12210, "Action", "Rockstar Games", "22 GB", "PROPHET"],
+        ["Grand Theft Auto: The Trilogy - The Definitive Edition", 1501270, "Action", "Rockstar Games", "45 GB", "FLT"],
+        ["Grand Theft Auto VI", 999999, "Action", "Rockstar Games", "150 GB", "Upcoming"],
+        ["Euro Truck Simulator 2", 227300, "Simulation", "SCS Software", "15 GB", "CODEX"],
+        ["American Truck Simulator", 270880, "Simulation", "SCS Software", "12 GB", "CODEX"],
+        ["Microsoft Flight Simulator", 1250410, "Simulation", "Asobo Studio", "150 GB", "HOODLUM"],
+        ["Cities: Skylines", 255710, "Simulation", "Colossal Order", "12 GB", "CODEX"],
+        ["Cities: Skylines II", 949230, "Simulation", "Colossal Order", "60 GB", "RUNE"],
+        ["The Sims 4", 1222670, "Simulation", "Maxis", "65 GB", "RELOADED"],
+        ["RimWorld", 294100, "Simulation", "Ludeon Studios", "3 GB", "GOG"],
+        ["Train Simulator Classic", 24010, "Simulation", "Dovetail Games", "40 GB", "RUNE"],
+        ["Drug Dealer Simulator 2", 1785630, "Simulation", "Byterunners", "25 GB", "RUNE"],
+        ["Gold Rush: The Game", 451340, "Simulation", "Code Horizon", "19 GB", "CODEX"],
+        ["Lawn Mowing Simulator", 1488150, "Simulation", "Skyhook Games", "20 GB", "FLT"],
+        ["Tavern Manager Simulator", 2756770, "Simulation", "One More Games", "6 GB", "TENOKE"],
+        ["Car For Sale Simulator 2023", 2248760, "Simulation", "Red Axe Games", "10 GB", "TENOKE"],
+        ["Ship Graveyard Simulator 2", 2201940, "Simulation", "Games Incubator", "18 GB", "RUNE"],
+        ["Police Simulator: Patrol Officers", 997010, "Simulation", "Aesir Interactive", "12 GB", "FLT"]
     ];
 
     const allSeeds = [...seeds, ...extraSeeds];
@@ -1368,6 +1396,7 @@ const GAMES_DATA = {
 
         GAMES_DATA.games.push({
             id: slug,
+            appId: appId,
             title: title,
             bgClass: "card-seeded",
             imgUrl: title.includes("Far Cry 6") ? "fc6_header.png"
@@ -1376,7 +1405,9 @@ const GAMES_DATA = {
                         : title.includes("FC 26") ? "fc26_header.jpg"
                             : title.includes("Cricket 22") ? "cricket22_header.jpg"
                                 : title.includes("Cricket 26") ? "cricket26_header.jpg"
-                                    : `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
+                                    : title.includes("Planet Crafter") ? "planet_crafter_header.jpg"
+                                        : title.includes("Grand Theft Auto VI") ? "gta6_header.jpg"
+                                            : `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
             category: cat,
             releaseDate: "2022-01-01",
             crackDate: isCracked ? "2022-01-02" : "Pending",

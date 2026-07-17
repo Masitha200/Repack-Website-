@@ -34,9 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadMoreContainer = document.getElementById("cracks-load-more-div");
     const categoryFilterBar = document.getElementById("category-filter-bar");
 
-    // New Releases DOM components
-    const releasesTimeline = document.getElementById("releases-timeline");
-    const uncrackedList = document.getElementById("un-cracked-list");
+    // Premium Games DOM components
+    const premiumGamesGrid = document.getElementById("premium-games-grid");
 
     // Free Games DOM components
     const activeFreeGrid = document.getElementById("active-free-grid");
@@ -250,12 +249,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const statusColor = isCracked ? "color-success" : (game.crackStatus === "Bypass" ? "color-warning" : "color-danger");
         const statusBadge = isCracked ? `<i class="fa-solid fa-lock-open ${statusColor}"></i> Cracked` : `<i class="fa-solid fa-lock ${statusColor}"></i> ${game.crackStatus}`;
 
-        // Dynamic cover image support (real img tag)
-        const fallbackSrc = game.title.toLowerCase().includes("cricket")
-            ? "https://cdn.cloudflare.steamstatic.com/steam/apps/2358260/header.jpg"
-            : "https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/header.jpg";
-
-        const coverImgMarkup = game.imgUrl ? `<img src="${game.imgUrl}" alt="${game.title}" class="game-card-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackSrc}';" />` : `<i class="fa-solid fa-gamepad card-icon"></i>`;
+        const coverImgMarkup = game.imgUrl
+            ? `<i class="fa-solid fa-gamepad card-icon" style="display: none;"></i>
+               <img src="${game.imgUrl}" alt="${game.title}" class="game-card-img" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='block';" />`
+            : `<i class="fa-solid fa-gamepad card-icon"></i>`;
 
         // Render both Repack size and full Installed size
         const sizeInfoMarkup = game.sizeRepack === "-" || game.sizeRepack === ""
@@ -460,59 +457,85 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ==========================================
-    // 5. NEW RELEASES & PROTECTIONS
+    // 5. PREMIUM GAMES CATALOG (STEAM STORE)
     // ==========================================
 
-    function initNewReleases() {
-        let timelineHtml = "";
+    // Helper to calculate mock price for Steam games
+    function getGamePrice(game) {
+        if (game.id === "black-myth-wukong") return "$59.99";
+        if (game.id === "elden-ring-shadow") return "$39.99";
+        if (game.id === "grand-theft-auto-v") return "$29.99";
+        if (game.id === "stalker-2") return "$59.99";
+        if (game.id === "indiana-jones") return "$69.99";
+        if (game.id === "cyberpunk-phantom-liberty") return "$29.99";
+        if (game.id === "grand-theft-auto-vi") return "$79.99";
 
-        GAMES_DATA.releasesTimeline.forEach(game => {
-            const statusLabel = game.status === "Cracked" ? "Cracked" : (game.status === "Upcoming" ? "Upcoming" : "Uncracked");
-            let iconClass = "status-uncracked";
-            if (statusLabel === "Cracked") iconClass = "status-cracked";
-            if (statusLabel === "Upcoming") iconClass = "status-upcoming";
+        // Dynamic prices based on repack size
+        const sizeGb = parseFloat(game.sizeOriginal) || 30;
+        if (sizeGb > 80) return "$69.99";
+        if (sizeGb > 50) return "$59.99";
+        if (sizeGb > 30) return "$39.99";
+        if (sizeGb > 10) return "$19.99";
+        return "$9.99";
+    }
 
-            timelineHtml += `
-                <div class="timeline-element ${iconClass}">
-                    <div class="timeline-dot"></div>
-                    <span class="timeline-date">${game.releaseDate} (${game.daysAgo})</span>
-                    <div class="timeline-content">
-                        <div class="timeline-flex-header">
-                            <span class="timeline-title">${game.title}</span>
-                            <span class="status-badge ${game.statusClass}">${statusLabel}</span>
-                        </div>
-                        <div class="timeline-info-row">
-                            <span><i class="fa-solid fa-shield-halved"></i> DRM: ${game.protection}</span>
-                            <span><i class="fa-solid fa-gamepad"></i> Genre: ${game.category}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        releasesTimeline.innerHTML = timelineHtml;
-
-        // Populate Uncracked sidebar
-        let uncrackedHtml = "";
-        const uncrackedGames = GAMES_DATA.releasesTimeline.filter(g => g.status === "Uncracked" || g.statusClass === "status-uncracked");
-        uncrackedGames.forEach(game => {
-            uncrackedHtml += `
-                <li class="un-cracked-item">
-                    <div>
-                        <strong>${game.title}</strong>
-                        <span class="uncracked-sub">DRM Protection: ${game.protection}</span>
-                    </div>
-                    <button class="btn btn-secondary btn-small" onclick="requestVoteUncracked('${game.title}')">
-                        <i class="fa-solid fa-circle-question"></i> Request Crack
-                    </button>
-                </li>
-            `;
-        });
-
-        if (uncrackedHtml === "") {
-            uncrackedList.innerHTML = `<li style="color: var(--text-dim);">No uncracked releases currently tracked.</li>`;
-        } else {
-            uncrackedList.innerHTML = uncrackedHtml;
+    function getSteamStoreUrl(game) {
+        let appId = game.appId;
+        if (!appId && game.imgUrl && game.imgUrl.includes("steam/apps/")) {
+            const match = game.imgUrl.match(/\/apps\/(\d+)\//);
+            if (match) {
+                appId = parseInt(match[1]);
+            }
         }
+
+        if (appId && appId > 0 && appId < 3500000 && appId !== 999999) {
+            return `https://store.steampowered.com/app/${appId}`;
+        }
+        return `https://store.steampowered.com/search/?term=${encodeURIComponent(game.title)}`;
+    }
+
+    function generatePremiumGameCardHtml(game) {
+        const price = getGamePrice(game);
+        const steamUrl = getSteamStoreUrl(game);
+
+        let imgHtml = "";
+        if (game.imgUrl) {
+            imgHtml = `<img src="${game.imgUrl}" alt="${game.title}" class="game-card-img" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='block';" />`;
+        }
+
+        return `
+            <article class="game-card">
+                <div class="card-img-placeholder ${game.bgClass}">
+                    <i class="fa-solid fa-gamepad card-icon" style="display: ${game.imgUrl ? 'none' : 'block'};"></i>
+                    ${imgHtml}
+                    <div class="card-rating-badge"><i class="fa-solid fa-star"></i> ${game.rating}</div>
+                </div>
+                <div class="game-card-body">
+                    <div class="game-card-category">${game.category}</div>
+                    <h3 class="game-card-title">${game.title}</h3>
+                    <div class="game-card-meta" style="margin-bottom: 1.25rem;">
+                        <span><i class="fa-solid fa-tag" style="color: var(--accent-pink);"></i> Price: ${price}</span>
+                        <span><i class="fa-solid fa-building" style="color: var(--accent-blue);"></i> ${game.developer.split(' / ')[0]}</span>
+                    </div>
+                    <a href="${steamUrl}" target="_blank" class="btn btn-primary btn-small btn-full-width" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                        <i class="fa-brands fa-steam"></i> Buy on Steam Store
+                    </a>
+                </div>
+            </article>
+        `;
+    }
+
+    function initPremiumGames() {
+        if (!premiumGamesGrid) return;
+        let premiumGridHtml = "";
+
+        GAMES_DATA.games.forEach(game => {
+            if (game.id === "grand-theft-auto-vi" || game.title === "Grand Theft Auto VI") {
+                return;
+            }
+            premiumGridHtml += generatePremiumGameCardHtml(game);
+        });
+        premiumGamesGrid.innerHTML = premiumGridHtml;
     }
 
     window.requestVoteUncracked = function (gameName) {
@@ -978,7 +1001,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 initDashboard();
                 renderCracksCatalog();
-                initNewReleases();
+                initPremiumGames();
 
                 GAMES_DATA.liveTickerNews.unshift(`${newGame.crackGroup} cracked and repacked ${newGame.title} (${newGame.sizeRepack}) on release day!`);
                 initLiveTicker();
@@ -1065,7 +1088,7 @@ document.addEventListener("DOMContentLoaded", () => {
         initLiveTicker();
         initDashboard();
         renderCracksCatalog();
-        initNewReleases();
+        initPremiumGames();
         renderFreeGames();
         loadRequests();
         startLiveAutoUpdateScheduler();
