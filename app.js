@@ -523,56 +523,131 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ==========================================
-    // 6. FREE GAMES PAGE
+    // 6. FREE GAMES PAGE — Live Epic API
     // ==========================================
 
-    function renderFreeGames(storeFilter = "all") {
-        let activeHtml = "";
-        let upcomingHtml = "";
+    let liveCurrentFilter = "all";
 
-        // Filter free games database
-        const filteredFreeGames = GAMES_DATA.freeGames.filter(g =>
-            storeFilter === "all" || g.store === storeFilter
-        );
-
-        filteredFreeGames.forEach(game => {
-            const isEpic = game.store === "epic";
-            const storeIcon = isEpic ? '<span class="store-icon epic-icon">E</span>' : '<i class="fa-brands fa-steam"></i>';
-            const storeTitle = isEpic ? "Epic Games Store" : "Steam Store";
-
-            const cardMarkup = `
-                <div class="free-game-card">
-                    <div class="free-img-block" style="background-image: url('${game.imgUrl}')">
-                        <div class="free-img-overlay"></div>
-                        <div class="store-badge">${storeIcon} ${storeTitle}</div>
-                        <div class="discount-badge">${game.discount}</div>
+    function buildFreeGameCard(game) {
+        const isEpic = game.store === "epic";
+        const storeIcon = isEpic ? '<span class="store-icon epic-icon">E</span>' : '<i class="fa-brands fa-steam"></i>';
+        const storeTitle = isEpic ? "Epic Games Store" : "Steam Store";
+        return `
+            <div class="free-game-card">
+                <div class="free-img-block" style="background-image: url('${game.imgUrl}')">
+                    <div class="free-img-overlay"></div>
+                    <div class="store-badge">${storeIcon} ${storeTitle}</div>
+                    <div class="discount-badge">${game.discount}</div>
+                </div>
+                <div class="free-game-body">
+                    <h3 class="free-game-title">${game.title}</h3>
+                    <div class="free-game-dates">
+                        <i class="fa-regular fa-calendar-check"></i>
+                        <span>Promo: ${game.startDate} - ${game.endDate}</span>
                     </div>
-                    <div class="free-game-body">
-                        <h3 class="free-game-title">${game.title}</h3>
-                        <div class="free-game-dates">
-                            <i class="fa-regular fa-calendar-check"></i>
-                            <span>Promo: ${game.startDate} - ${game.endDate}</span>
-                        </div>
-                        <div class="free-game-actions">
-                            <span class="original-price">${game.originalPrice}</span>
-                            <a href="${game.url}" target="_blank" class="btn btn-primary btn-small">
-                                <i class="fa-solid fa-up-right-from-square"></i> Get Game Free
-                            </a>
-                        </div>
+                    <div class="free-game-actions">
+                        <span class="original-price">${game.originalPrice}</span>
+                        <a href="${game.url}" target="_blank" class="btn btn-primary btn-small">
+                            <i class="fa-solid fa-up-right-from-square"></i> Get Game Free
+                        </a>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
+    }
 
-            if (game.type === "active") {
-                activeHtml += cardMarkup;
-            } else {
-                upcomingHtml += cardMarkup;
-            }
+    function renderFreeGamesFromData(games, storeFilter) {
+        let activeHtml = "", upcomingHtml = "";
+        const filtered = games.filter(g => storeFilter === "all" || g.store === storeFilter);
+        filtered.forEach(game => {
+            const card = buildFreeGameCard(game);
+            if (game.type === "active") activeHtml += card;
+            else upcomingHtml += card;
         });
-
-        // Set grids contents
         activeFreeGrid.innerHTML = activeHtml || '<p style="grid-column:1/-1; color: var(--text-dim);">No active giveaways found.</p>';
         upcomingFreeGrid.innerHTML = upcomingHtml || '<p style="grid-column:1/-1; color: var(--text-dim);">No upcoming giveaways listed.</p>';
+    }
+
+    async function fetchAndRenderEpicFreeGames(storeFilter = "all") {
+        // Show loader
+        activeFreeGrid.innerHTML = '<p style="grid-column:1/-1; color: var(--text-dim);"><i class="fa-solid fa-spinner fa-spin"></i> Loading live data from Epic Games Store...</p>';
+        upcomingFreeGrid.innerHTML = "";
+
+        try {
+            const EPIC_API = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US";
+            const res = await fetch(EPIC_API);
+            if (!res.ok) throw new Error("API error");
+            const data = await res.json();
+
+            const offers = data?.data?.Catalog?.searchStore?.elements || [];
+            const now = new Date();
+            const livegames = [];
+
+            offers.forEach(offer => {
+                const promo = offer?.promotions;
+                if (!promo) return;
+
+                const allOffers = [
+                    ...(promo.promotionalOffers?.[0]?.promotionalOffers || []),
+                    ...(promo.upcomingPromotionalOffers?.[0]?.promotionalOffers || [])
+                ];
+
+                allOffers.forEach(p => {
+                    if (p.discountSetting?.discountPercentage !== 0) return; // not 100% off
+
+                    const start = new Date(p.startDate);
+                    const end = new Date(p.endDate);
+                    const isActive = now >= start && now < end;
+                    const isUpcoming = now < start;
+                    if (!isActive && !isUpcoming) return;
+
+                    // Get cover image
+                    const imgKey = offer.keyImages?.find(k => k.type === "OfferImageWide" || k.type === "DieselStoreFrontWide" || k.type === "Thumbnail");
+                    const imgUrl = imgKey?.url || "";
+
+                    // Original price
+                    const priceFmt = offer.price?.totalPrice?.fmtPrice?.originalPrice || "Free";
+
+                    const slug = offer.productSlug || offer.urlSlug || "";
+                    const url = slug ? `https://store.epicgames.com/en-US/p/${slug}` : "https://store.epicgames.com/";
+
+                    const formatDate = (d) => d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+                    livegames.push({
+                        id: offer.id,
+                        store: "epic",
+                        type: isActive ? "active" : "upcoming",
+                        title: offer.title,
+                        originalPrice: priceFmt,
+                        discount: isActive ? "100% OFF" : "Free Next Week",
+                        startDate: formatDate(start),
+                        endDate: formatDate(end),
+                        url: url,
+                        imgUrl: imgUrl
+                    });
+                });
+            });
+
+            if (livegames.length === 0) throw new Error("No games found");
+
+            // Also merge Steam free games from local data (API only covers Epic)
+            const steamGames = GAMES_DATA.freeGames.filter(g => g.store === "steam");
+            const allGames = [...livegames, ...steamGames];
+
+            showToast("✅ Live free games loaded from Epic API!", "success");
+            renderFreeGamesFromData(allGames, storeFilter);
+
+        } catch (err) {
+            // Fallback to hardcoded data
+            console.warn("Epic API unavailable, using cached data:", err.message);
+            showToast("Using cached free games data (API unavailable)", "warning");
+            renderFreeGamesFromData(GAMES_DATA.freeGames, storeFilter);
+        }
+    }
+
+    function renderFreeGames(storeFilter = "all") {
+        liveCurrentFilter = storeFilter;
+        fetchAndRenderEpicFreeGames(storeFilter);
     }
 
     // Store filter click handles
@@ -581,11 +656,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const currentTab = e.currentTarget;
             storeTabs.forEach(t => t.classList.remove("active"));
             currentTab.classList.add("active");
-
             const store = currentTab.getAttribute("data-store");
             renderFreeGames(store);
         });
     });
+
+
 
     // ==========================================
     // 7. REQUEST SYSTEM & LOCAL STORAGE
