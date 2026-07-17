@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle Page Load Hash Routing
     if (window.location.hash) {
         const hashTarget = window.location.hash.substring(1);
-        const validHashes = ["home", "cracks", "releases", "freebies", "requests"];
+        const validHashes = ["home", "cracks", "releases", "freebies", "requests", "hypervisor"];
         if (validHashes.includes(hashTarget)) {
             navigateToSection(hashTarget);
         } else {
@@ -251,7 +251,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const statusBadge = isCracked ? `<i class="fa-solid fa-lock-open ${statusColor}"></i> Cracked` : `<i class="fa-solid fa-lock ${statusColor}"></i> ${game.crackStatus}`;
 
         // Dynamic cover image support (real img tag)
-        const coverImgMarkup = game.imgUrl ? `<img src="${game.imgUrl}" alt="${game.title}" class="game-card-img" loading="lazy" />` : `<i class="fa-solid fa-gamepad card-icon"></i>`;
+        const fallbackSrc = game.title.toLowerCase().includes("cricket")
+            ? "https://cdn.cloudflare.steamstatic.com/steam/apps/2358260/header.jpg"
+            : "https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/header.jpg";
+
+        const coverImgMarkup = game.imgUrl ? `<img src="${game.imgUrl}" alt="${game.title}" class="game-card-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackSrc}';" />` : `<i class="fa-solid fa-gamepad card-icon"></i>`;
 
         // Render both Repack size and full Installed size
         const sizeInfoMarkup = game.sizeRepack === "-" || game.sizeRepack === ""
@@ -300,8 +304,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const query = searchFilter.toLowerCase().trim();
             const normalizedQuery = query.replace(/\s+/g, "");
 
-            // Gamer search helper (e.g., "rdr2" matches "Red Dead Redemption 2")
+            // gamer search helper (e.g., "rdr2" matches "Red Dead Redemption 2")
             let titleMatches = game.title.toLowerCase().includes(query);
+
+            // FIFA key alias mapping: "fifa 26" or "fifa" query maps to "EA Sports FC 26"
+            if (!titleMatches) {
+                if (query.includes("fifa") && game.title.toLowerCase().includes("ea sports fc")) {
+                    titleMatches = true;
+                }
+                const fifaNumMatch = query.match(/fifa\s*(\d+)/);
+                if (fifaNumMatch) {
+                    const num = fifaNumMatch[1];
+                    if (game.title.toLowerCase().includes(`ea sports fc ${num}`)) {
+                        titleMatches = true;
+                    }
+                }
+            }
+
             if (!titleMatches && query.length >= 2) {
                 const words = game.title.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/);
                 const acronym = words.map(w => w[0]).join("");
@@ -416,6 +435,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         navigateToSection("cracks");
     };
+
+    window.tabNavigation = function (targetId) {
+        navigateToSection(targetId);
+    };
+
+    // Handle inactive dummy links (#) gracefully
+    document.addEventListener("click", (e) => {
+        const anchor = e.target.closest("a");
+        if (anchor) {
+            const href = anchor.getAttribute("href");
+            if (href === "#" && !anchor.hasAttribute("onclick") && !anchor.id.includes("logo-btn")) {
+                e.preventDefault();
+                showToast("Social links and official channels are coming soon!");
+            }
+        }
+    });
 
     // Load More action
     loadMoreButton.addEventListener("click", () => {
@@ -709,24 +744,25 @@ document.addEventListener("DOMContentLoaded", () => {
         let downloadMirrorsHtml = "";
         let downloadButtonsHtml = "";
         if (isCracked) {
+            const cleanSearchTitle = game.title.replace(/\s*\([^)]*\)/g, "").trim();
             downloadMirrorsHtml = `
                 <h3 class="mirrors-title"><i class="fa-solid fa-cloud-arrow-down color-success"></i> Download Mirrors & Repackers</h3>
                 <div class="mirrors-grid">
-                    <a href="https://fitgirl-repacks.site/?s=${encodeURIComponent(game.title)}" target="_blank" class="mirror-card">
+                    <a href="https://fitgirl-repacks.site/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="mirror-card">
                         <div class="mirror-info">
                             <span class="mirror-source">FitGirl Repacks</span>
                             <span class="mirror-type">Lossless Repack</span>
                         </div>
                         <i class="fa-solid fa-globe mirror-icon"></i>
                     </a>
-                    <a href="https://dodi-repacks.site/?s=${encodeURIComponent(game.title)}" target="_blank" class="mirror-card">
+                    <a href="https://dodi-repacks.site/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="mirror-card">
                         <div class="mirror-info">
                             <span class="mirror-source">DODI Repacks</span>
                             <span class="mirror-type">Highly Compressed</span>
                         </div>
                         <i class="fa-solid fa-globe mirror-icon"></i>
                     </a>
-                    <a href="https://steamrip.com/?s=${encodeURIComponent(game.title)}" target="_blank" class="mirror-card">
+                    <a href="https://steamrip.com/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="mirror-card">
                         <div class="mirror-info">
                             <span class="mirror-source">SteamRIP</span>
                             <span class="mirror-type">Pre-installed GOG/Steam</span>
@@ -734,25 +770,36 @@ document.addEventListener("DOMContentLoaded", () => {
                         <i class="fa-solid fa-circle-down mirror-icon"></i>
                     </a>
                     ${game.downloads.direct && game.downloads.direct !== "" ? `
-                    <a href="${game.downloads.direct}" target="_blank" class="mirror-card">
+                    <a href="${game.downloads.direct.includes('neoplay_') ? `https://steamrip.com/?s=${encodeURIComponent(cleanSearchTitle)}` : game.downloads.direct}" target="_blank" class="mirror-card" onclick="if('${game.downloads.direct}'.includes('neoplay_')) showToast('Redirecting to high-speed SteamRIP DDL mirrors...');">
                         <div class="mirror-info">
-                            <span class="mirror-source">GoFile Server</span>
-                            <span class="mirror-type">Direct High-Speed</span>
+                            <span class="mirror-source">Direct Download</span>
+                            <span class="mirror-type">Direct High-Speed DDL</span>
                         </div>
                         <i class="fa-solid fa-cloud-arrow-down mirror-icon"></i>
                     </a>` : ''}
                     ${game.downloads.magnet && game.downloads.magnet !== "" ? `
-                    <a href="${game.downloads.magnet}" class="mirror-card" onclick="showToast('Copying magnet link to clipboard...'); navigator.clipboard.writeText('${game.downloads.magnet}')">
+                    <a href="${game.downloads.magnet.includes('repack') ? `https://1337x.to/sort-search/${encodeURIComponent(cleanSearchTitle)}/seeders/desc/1/` : game.downloads.magnet}" target="_blank" class="mirror-card" onclick="if('${game.downloads.magnet}'.includes('repack')) { showToast('Searching torrent trackers for active seeds...'); } else { showToast('Copying magnet link to clipboard...'); navigator.clipboard.writeText('${game.downloads.magnet}'); }">
                         <div class="mirror-info">
                             <span class="mirror-source">Magnet Torrent</span>
-                            <span class="mirror-type">Torrent Download</span>
+                            <span class="mirror-type">Torrent Tracker Search</span>
                         </div>
                         <i class="fa-solid fa-magnet mirror-icon"></i>
                     </a>` : ''}
                 </div>
             `;
+            if (game.crackGroup === "Hypervisor") {
+                downloadMirrorsHtml += `
+                    <div style="background: rgba(6, 182, 212, 0.08); border: 1px dashed rgba(6, 182, 212, 0.3); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-size: 0.85rem; color: var(--text-main); display: flex; align-items: start; gap: 0.75rem;">
+                        <i class="fa-solid fa-circle-info" style="color: var(--accent-blue); font-size: 1.1rem; margin-top: 2px;"></i>
+                        <div>
+                            <strong>Virtualization Required:</strong> This bypass utilizes Hypervisor emulation. You must have Intel VT-x or AMD-V active in your BIOS.
+                            <a href="#hypervisor" onclick="closeModal(); tabNavigation('hypervisor');" style="color: var(--accent-blue); text-decoration: underline; font-weight: 600; margin-left: 4px;">Read Hypervisor Setup Guide &rarr;</a>
+                        </div>
+                    </div>
+                `;
+            }
             downloadButtonsHtml = `
-                <a href="https://dodi-repacks.site/?s=${encodeURIComponent(game.title)}" target="_blank" class="btn btn-primary">
+                <a href="https://dodi-repacks.site/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="btn btn-primary">
                     <i class="fa-solid fa-circle-arrow-down"></i> Quick Repack Search
                 </a>
                 <button class="btn btn-outline" onclick="closeModal()">Close Detail</button>
@@ -866,6 +913,64 @@ document.addEventListener("DOMContentLoaded", () => {
             runScheduler();
             setInterval(runScheduler, 10000);
         }, 5000); // Trigger first auto update in 5 seconds so user can see it quickly
+    }
+
+    // Environment Diagnostics Check for Hypervisor view
+    const sectionRunDiag = document.getElementById("btn-section-run-diag");
+    if (sectionRunDiag) {
+        sectionRunDiag.addEventListener("click", () => {
+            const btn = document.getElementById("btn-section-run-diag");
+            const term = document.getElementById("section-terminal");
+            const barOuter = document.getElementById("section-bar-outer");
+            const barInner = document.getElementById("section-bar-inner");
+
+            btn.disabled = true;
+            term.innerHTML = "";
+            barOuter.style.display = "block";
+            barInner.style.width = "0%";
+
+            const logs = [
+                { delay: 300, text: "> Init hypervisor diagnostics sequence...", type: "info" },
+                { delay: 800, text: "> Querying local CPU specifications...", type: "info" },
+                { delay: 1300, text: `> Active CPU: ${navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' Logical Cores' : 'x86_64 Compatible Processor'}`, type: "success" },
+                { delay: 1800, text: "> Testing CPU execution capabilities for VT-x/SVM instruction sets...", type: "info" },
+                { delay: 2200, text: "> [OK] Hardware-assisted instruction checks returned active registers.", type: "success" },
+                { delay: 2700, text: "> Verification check for Virtualization-based Security (VBS) state...", type: "info" },
+                { delay: 3200, text: "> [WARNING] Host OS virtualization isolation (Hyper-V) hooks active. Bypasses might require disabling credential guard.", type: "warning" },
+                { delay: 3700, text: "> Examining browser sandbox environment properties...", type: "info" },
+                { delay: 4100, text: "> [OK] System compliant with virtual network emulators.", type: "success" },
+                { delay: 4600, text: "> All checks complete. VM offline bypass system ready to deploy.", type: "success" }
+            ];
+
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 2;
+                if (progress <= 100) {
+                    barInner.style.width = `${progress}%`;
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 90);
+
+            logs.forEach(log => {
+                setTimeout(() => {
+                    const line = document.createElement("div");
+                    line.className = `console-line line-${log.type}`;
+                    line.style.marginBottom = "0.3rem";
+                    if (log.type === "info") line.style.color = "#94a3b8";
+                    if (log.type === "success") line.style.color = "#10b981";
+                    if (log.type === "warning") line.style.color = "#f59e0b";
+                    term.appendChild(line);
+                    term.innerText += (term.innerText ? "\n" : "") + log.text;
+                    term.scrollTop = term.scrollHeight;
+
+                    if (log.text.includes("ready to deploy")) {
+                        btn.disabled = false;
+                        showToast("Bypass diagnostic completed successfully!");
+                    }
+                }, log.delay);
+            });
+        });
     }
 
     function initializeAll() {

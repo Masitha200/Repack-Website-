@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Deep dive into Hypervisor bypass technology in modern PC game cracking. Learn how virtualization emulates DRM layers (Denuvo, EA Anti-Cheat) for offline play.">
+    <title>NeoPlay | Hypervisor DRM Bypass Explained</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="style.css?v=3.3">
+
+    <style>
+        /* Hypervisor specific page styling */
+        .article-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            transition: var(--transition-smooth);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .btn-back:hover {
+            color: white;
+            border-color: var(--accent-purple);
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .header-meta-box {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .tech-category-pill {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .doc-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 2.2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doc-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .doc-section h2 {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 0.5rem;
+        }
+
+        .doc-section h2 i {
+            color: var(--accent-blue);
+        }
+
+        .visual-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+        }
+
+        .diagram-node {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .diagram-node:hover {
+            border-color: var(--accent-purple);
+            background: rgba(124, 58, 237, 0.03);
+            transform: translateX(5px);
+        }
+
+        .node-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+            color: white;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+        }
+
+        .node-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            margin-bottom: 0.2rem;
+            color: white;
+        }
+
+        .node-content p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .diagram-arrow {
+            display: flex;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            animation: bounceY 1.5s infinite ease-in-out;
+        }
+
+        @keyframes bounceY {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(5px);
+            }
+        }
+
+        /* Bios settings guide styles */
+        .instructions-list {
+            margin: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .instruction-step {
+            display: flex;
+            gap: 1rem;
+            background: var(--bg-tertiary);
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-pink);
+        }
+
+        .instruction-step strong {
+            color: var(--text-main);
+        }
+
+        /* Virtualization tool layout */
+        .tester-container {
+            background: linear-gradient(135deg, rgba(12, 11, 20, 0.9) 0%, rgba(20, 15, 34, 0.9) 100%);
+            border: 1px solid rgba(124, 58, 237, 0.25);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.1);
+        }
+
+        .tester-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tester-title {
+            font-family: var(--font-heading);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tester-title i {
+            color: var(--accent-pink);
+        }
+
+        .tester-console {
+            background: #050608;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            height: 180px;
+            overflow-y: auto;
+            color: #38bdf8;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .console-line {
+            margin-bottom: 0.4rem;
+        }
+
+        .line-info {
+            color: #94a3b8;
+        }
+
+        .line-success {
+            color: #10b981;
+        }
+
+        .line-warning {
+            color: #f59e0b;
+        }
+
+        .line-danger {
+            color: #ef4444;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            border-radius: 3px;
+            transition: width 0.1s ease;
+        }
+
+        .tester-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* responsive code */
+        @media (max-width: 768px) {
+            .article-wrapper {
+                padding: 1.5rem 1rem;
+            }
+
+            .doc-section {
+                padding: 1.5rem;
+            }
+
+            .doc-section h2 {
+                font-size: 1.35rem;
+            }
+
+            .tester-actions {
+                flex-direction: column;
+            }
+
+            .tester-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Progress Bar -->
+    <div id="top-progress-bar" class="progress-bar"></div>
+
+    <!-- Navigation Header -->
+    <header class="main-header"
+        style="position: sticky; top: 0; z-index: 1000; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-glass);">
+        <div class="header-container"
+            style="max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem;">
+            <a href="index.html" class="logo"
+                style="display: flex; align-items: center; text-decoration: none; color: white; font-family: var(--font-heading); font-weight: 800; font-size: 1.4rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#7c3aed" class="logo-icon-svg"
+                    style="width: 32px; height: 32px; margin-right: 0.6rem; filter: drop-shadow(0 0 8px rgba(124,58,237,0.6));">
+                    <path
+                        d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2Zm-10 7H9v2H8v-2H6v-1h2v-2h1v2h2v1Zm4.5 1.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5Zm3-3c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5Z" />
+                </svg>
+                <span><span class="logo-accent" style="color: var(--accent-purple);">NEO</span>PLAY</span>
+            </a>
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Technology Insights</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="article-wrapper">
+        <a href="index.html" class="btn-back" id="back-home-btn">
+            <i class="fa-solid fa-arrow-left"></i> Home Dashboard
+        </a>
+
+        <!-- Section: Header Title -->
+        <div style="margin-bottom: 3rem;">
+            <div class="tech-category-pill">DRM Virtualization</div>
+            <h1
+                style="font-family: var(--font-heading); font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-top: 1rem; color: white;">
+                Hypervisor Bypass: Crucial Insights
+            </h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem; line-height: 1.6;">
+                Understanding virtualization techniques, custom emulations, and setup instructions for modern PC games
+                using Hypervisor launchers.
+            </p>
+            <div class="header-meta-box">
+                <span><i class="fa-regular fa-calendar"></i> July 17, 2026</span>
+                <span>•</span>
+                <span><i class="fa-regular fa-clock"></i> 8 Min Read</span>
+                <span>•</span>
+                <span><i class="fa-solid fa-user-shield"></i> Technical Guide</span>
+            </div>
+        </div>
+
+        <!-- Section 1: Intro to Hypervisors -->
+        <section class="doc-section" id="sec-what-is-hypervisor">
+            <h2><i class="fa-solid fa-microchip"></i> What is a Hypervisor?</h2>
+            <p style="line-height: 1.7; color: var(--text-muted); margin-bottom: 1rem;">
+                A <strong>Hypervisor</strong> (also known as a <strong>Virtual Machine Monitor - VMM</strong>) is a
+                layer of computer software, firmware, or hardware that creates and runs virtual machines. By utilizing a
+                hypervisor, a single host computer can support multiple guest VMs by virtually dividing and allocating
+                its physical resources (CPU cores, memory, storage).
+            </p>
+            <p style="line-height: 1.7; color: var(--text-muted);">
+                In traditional computing, hypervisors are split into two categories:
+            </p>
+            <ul
+                style="list-style: none; margin: 1rem 0; padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.8rem;">
+                <li style="border-left: 3px solid var(--accent-purple); padding-left: 1rem; font-size: 0.95rem;">
+                    <strong style="color: white; display: block;">Type-1 (Bare-Metal):</strong> Runs directly on the
+                    host's physical motherboard hardware (e.g., VMware ESXi, Microsoft Hyper-V, Xen). They have superior
+                    hardware performance.
+                </li>
+                <li style="border-left: 3px solid var(--accent-blue); padding-left: 1rem; font-size: 0.95rem;">
+                    <strong style="color: white; display: block;">Type-2 (Hosted):</strong> Runs as an application layer
+                    on top of a standard host Operating System (e.g., VirtualBox, VMware Workstation).
+                </li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Virtualization in Game Cracking -->
+        <section class="doc-section" id="sec-how-cracks-work">
+            <h2><i class="fa-solid fa-unlock-keyhole"></i> Virtualization in DRM Bypassing</h2>
+            <p style="line-height: 1.7; color: var(--text-muted); margin-bottom: 1rem;">
+                With modern anti-piracy protection systems (like **Denuvo Anti-Tamper** and **EA Anti-Cheat**) requiring
+                deep, ring-0 kernel-level integration while checking computer registers continuously, standard offline
+                patches fail.
+            </p>
+            <p style="line-height: 1.7; color: var(--text-muted);">
+                Instead of rewriting the entire obfuscated DRM binary, modern bypasses utilize custom **virtualized
+                environments**. The game runs in a highly specialized guest system controlled by a tiny hypervisor. This
+                hypervisor intercepts, emulates, and modifies system validation triggers in real-time, convincing the
+                game it is running on authoritatively certified hardware.
+            </p>
+
+            <div class="visual-diagram">
+                <div class="diagram-node">
+                    <div class="node-number">1</div>
+                    <div class="node-content">
+                        <h4>BIOS Virtualization (Intel VT-x / AMD-V)</h4>
+                        <p>Hardware virtualization instructions must be active in BIOS so the custom hypervisor engine
+                            can run at root-privilege ring -1.</p>
+                    </div>
+                </div>
+                <div class="diagram-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                <div class="diagram-node">
+                    <div class="node-number">2</div>
+                    <div class="node-content">
+                        <h4>Custom Hypervisor Boot (VM Launcher)</h4>
+                        <p>The specialized bypassing launcher loads, placing itself underneath Windows before booting
+                            the game binary.</p>
+                    </div>
+                </div>
+                <div class="diagram-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                <div class="diagram-node">
+                    <div class="node-number">3</div>
+                    <div class="node-content">
+                        <h4>DRM Call Interception & Spoofing</h4>
+                        <p>Whenever Denuvo queries hardware IDs, registry licenses, or anti-cheat callbacks, the
+                            hypervisor intercepts these and injects legitimate answers.</p>
+                    </div>
+                </div>
+                <div class="diagram-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                <div class="diagram-node"
+                    style="border-color: var(--status-cracked); background: rgba(16, 185, 129, 0.04);">
+                    <div class="node-number"
+                        style="background: var(--status-cracked); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);">✓</div>
+                    <div class="node-content">
+                        <h4>Offline Play Activated</h4>
+                        <p>The game validation loop succeeds completely offline, letting players launch titles like EA
+                            Sports FC 24/25 without connecting to EA servers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Hardware Requirements -->
+        <section class="doc-section" id="sec-hardware-requirements">
+            <h2><i class="fa-solid fa-list-check"></i> System & Hardware Requirements</h2>
+            <p style="line-height: 1.7; color: var(--text-muted); margin-bottom: 1rem;">
+                Running hypervisor-emulated bypass games requires specific virtualization capabilities in your CPU and
+                Operating System. Inspect the necessary criteria below:
+            </p>
+            <table
+                style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-glass);">
+                        <th style="padding: 0.75rem 0.5rem; color: white;">Component</th>
+                        <th style="padding: 0.75rem 0.5rem; color: white;">Required Setting / Specification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-glass);">
+                        <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--accent-blue);">CPU</td>
+                        <td style="padding: 0.75rem 0.5rem; color: var(--text-muted);">Intel Core i-series with VT-x, or
+                            AMD Ryzen with SVM technology.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-glass);">
+                        <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--accent-blue);">BIOS</td>
+                        <td style="padding: 0.75rem 0.5rem; color: var(--text-muted);">"Intel Virtualization Technology"
+                            or "Secure Virtual Machine (SVM)" must be set to <strong>Enabled</strong>.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-glass);">
+                        <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--accent-blue);">Intel SLAT /
+                            AMD RVI</td>
+                        <td style="padding: 0.75rem 0.5rem; color: var(--text-muted);">Support for Second Level Address
+                            Translation (active on almost all CPUs made since 2012).</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-glass);">
+                        <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--accent-blue);">Windows
+                            Features</td>
+                        <td style="padding: 0.75rem 0.5rem; color: var(--text-muted);">Hyper-V component platform
+                            disabled (for some custom loaders) or active Windows Sandbox features.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 4: BIOS Activation Tutorial -->
+        <section class="doc-section" id="sec-how-to-enable">
+            <h2><i class="fa-solid fa-gears"></i> How to Enable Virtualization (Step-by-Step)</h2>
+            <p style="line-height: 1.7; color: var(--text-muted);">
+                If your game shows a "Virtualization Disabled" or "Hypervisor Initialize Error", follow these steps to
+                turn it on:
+            </p>
+            <div class="instructions-list">
+                <div class="instruction-step">
+                    <span><strong>01.</strong></span>
+                    <div>
+                        <strong>Restart your computer:</strong> As the machine powers up, repeatedly press the BIOS
+                        setup hotkey (usually <strong>Delete</strong>, <strong>F2</strong>, <strong>F10</strong>, or
+                        <strong>F12</strong>).
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <span><strong>02.</strong></span>
+                    <div>
+                        <strong>Navigate to CPU Settings:</strong> Search for tabs named <em>Advanced</em>, <em>CPU
+                            Configuration</em>, <em>Processor Settings</em>, or <em>Overclocking</em>.
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <span><strong>03.</strong></span>
+                    <div>
+                        <strong>Activate Virtualization Feature:</strong>
+                        <ul
+                            style="list-style: square; margin-top: 0.5rem; padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+                            <li>If using an Intel CPU, set <strong>Intel Virtualization Technology (VT-x)</strong> to
+                                <strong>Enabled</strong>.</li>
+                            <li>If using an AMD CPU, set <strong>SVM Mode</strong> or <strong>AMD-V</strong> to
+                                <strong>Enabled</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <span><strong>04.</strong></span>
+                    <div>
+                        <strong>Save and Boot:</strong> Press <strong>F10</strong> to save configurations and exit.
+                        Windows will boot with virtualization active.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Interactive System Virtualization Check -->
+        <section class="doc-section" id="sec-hypervisor-check">
+            <h2><i class="fa-solid fa-terminal"></i> Interactive Virtualization Diagnostician</h2>
+            <p style="line-height: 1.7; color: var(--text-muted);">
+                Run this diagnostic utility to scan system properties, test browser engines for virtualization
+                capabilities, and verify bypass readiness rules.
+            </p>
+
+            <div class="tester-container">
+                <div class="tester-header">
+                    <div class="tester-title"><i class="fa-solid fa-gamepad"></i> VM Bypass Environment Scan</div>
+                    <span id="scan-status-badge" class="badge"
+                        style="background: var(--bg-tertiary); color: var(--text-muted); border: 1px solid var(--border-glass);">System
+                        Idle</span>
+                </div>
+
+                <div class="progress-bar-container" id="bar-outer">
+                    <div class="progress-bar-fill" id="bar-inner"></div>
+                </div>
+
+                <div class="tester-console" id="output-terminal">
+                    <div class="console-line line-info">&gt; Standing by. Click "Run Diagnostics" below to search for
+                        Hypervisor configurations...</div>
+                </div>
+
+                <div class="tester-actions">
+                    <button class="btn btn-primary" id="btn-run-diag" onclick="runDiagnostics()"><i
+                            class="fa-solid fa-play"></i> Run Diagnostics</button>
+                    <button class="btn btn-outline" id="btn-clear-console" onclick="clearConsole()"><i
+                            class="fa-solid fa-trash-can"></i> Clear Terminal</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer"
+        style="background: var(--bg-secondary); border-top: 1px solid var(--border-glass); padding: 3rem 1.5rem 1.5rem 1.5rem; margin-top: 4rem; text-align: center; font-size: 0.85rem; color: var(--text-dim);">
+        <div style="margin-bottom: 1rem;">
+            <span style="color: white; font-weight: bold;">NEOPLAY</span> - Research Gaming Portal &copy; 2026
+        </div>
+        <div>
+            This database is designed solely for archiving historical software protections, sandbox systems, and
+            emulation technology research.
+        </div>
+    </footer>
+
+    <!-- Toast elements -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        // Simple Toast display controller
+        function showToast(message) {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = "toast";
+            toast.style.borderLeft = "4px solid var(--accent-purple)";
+            toast.innerHTML = `<i class="fa-solid fa-circle-info color-success"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = "toastSlideIn 0.3s ease reverse";
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function clearConsole() {
+            const term = document.getElementById("output-terminal");
+            term.innerHTML = '<div class="console-line line-info">&gt; Console cleared. Standing by...</div>';
+            const badge = document.getElementById("scan-status-badge");
+            badge.innerText = "System Idle";
+            badge.style.background = "var(--bg-tertiary)";
+            badge.style.color = "var(--text-muted)";
+            badge.style.borderColor = "var(--border-glass)";
+        }
+
+        // Live Diagnostician Simulation
+        function runDiagnostics() {
+            const btn = document.getElementById("btn-run-diag");
+            const term = document.getElementById("output-terminal");
+            const barOuter = document.getElementById("bar-outer");
+            const barInner = document.getElementById("bar-inner");
+            const badge = document.getElementById("scan-status-badge");
+
+            btn.disabled = true;
+            term.innerHTML = "";
+            barOuter.style.display = "block";
+            barInner.style.width = "0%";
+            badge.innerText = "Scanning...";
+            badge.style.background = "rgba(245, 158, 11, 0.15)";
+            badge.style.color = "var(--status-upcoming)";
+            badge.style.borderColor = "var(--status-upcoming)";
+
+            const logs = [
+                { delay: 400, text: "> Init hypervisor diagnostics sequence...", type: "info" },
+                { delay: 1000, text: "> Querying local CPU specifications...", type: "info" },
+                { delay: 1500, text: `> Active CPU: ${navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' Logical Cores' : 'x86_64 Compatible Processor'}`, type: "success" },
+                { delay: 2000, text: "> Testing CPU execution capabilities for VT-x/SVM instruction sets...", type: "info" },
+                { delay: 2400, text: "> [OK] Hardware-assisted instruction checks returned active registers.", type: "success" },
+                { delay: 3000, text: "> Verification check for Virtualization-based Security (VBS) state...", type: "info" },
+                { delay: 3500, text: "> [WARNING] Host OS virtualization isolation (Hyper-V) hooks active. Bypasses might require disabling credential guard.", type: "warning" },
+                { delay: 4000, text: "> Examining browser sandbox environment properties...", type: "info" },
+                { delay: 4400, text: "> [OK] System compliant with virtual network emulators.", type: "success" },
+                { delay: 5000, text: "> All checks complete. VM offline bypass system ready to deploy.", type: "success" }
+            ];
+
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 2;
+                if (progress <= 100) {
+                    barInner.style.width = `${progress}%`;
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 100);
+
+            logs.forEach(log => {
+                setTimeout(() => {
+                    const line = document.createElement("div");
+                    line.className = `console-line line-${log.type}`;
+                    line.innerText = log.text;
+                    term.appendChild(line);
+                    term.scrollTop = term.scrollHeight;
+
+                    if (log.text.includes("ready to deploy")) {
+                        badge.innerText = "Ready";
+                        badge.style.background = "rgba(16, 185, 129, 0.15)";
+                        badge.style.color = "var(--status-cracked)";
+                        badge.style.borderColor = "var(--status-cracked)";
+                        btn.disabled = false;
+                        showToast("Bypass diagnostic completed successfully!");
+                    }
+                }, log.delay);
+            });
+        }
+    </script>
+</body>
+
+</html>

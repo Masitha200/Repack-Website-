@@ -19,7 +19,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style -->
-    <link rel="stylesheet" href="style.css?v=2.6">
+    <link rel="stylesheet" href="style.css?v=4.8">
 </head>
 
 <body>
@@ -56,6 +56,8 @@
                             Free Games</a></li>
                     <li><a href="#requests" class="nav-link" data-target="requests"><i
                                 class="fa-solid fa-circle-question"></i> Community Requests</a></li>
+                    <li><a href="#hypervisor" class="nav-link" data-target="hypervisor"><i
+                                class="fa-solid fa-microchip"></i> Hypervisor Guide</a></li>
                 </ul>
             </nav>
 
@@ -404,6 +406,118 @@
             </div>
         </section>
 
+        <!-- 6. HYPERVISOR BYPASS VIEW -->
+        <section id="view-hypervisor" class="view-section">
+            <!-- Header Banner -->
+            <div class="section-header-banner">
+                <h1><i class="fa-solid fa-microchip color-warning"></i> Hypervisor DRM Virtualization Guide</h1>
+                <p>Learn how modern VM-based virtualized emulators bypass Denuvo and EA Anti-Cheat, and how to verify
+                    system capabilities.</p>
+            </div>
+
+            <!-- Content Grid layout split -->
+            <div class="requests-grid-layout" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;">
+                <div class="timeline-panel"
+                    style="background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1.8rem;">
+                    <h2><i class="fa-solid fa-unlock-keyhole"></i> Virtualization in DRM Bypassing</h2>
+                    <p style="line-height: 1.6; color: var(--text-muted); margin-bottom: 1.25rem; font-size: 0.9rem;">
+                        Instead of completely patching Denuvo or EA Anti-Cheat, which are highly obfuscated kernel-level
+                        protections (Ring 0), modern bypasses run the game host under a specialized hypervisor virtual
+                        engine.
+                    </p>
+                    <p style="line-height: 1.6; color: var(--text-muted); margin-bottom: 1.25rem; font-size: 0.9rem;">
+                        The hypervisor intercepts register/license queries at Ring -1 and spoofs legitimate activation
+                        signals seamlessly, tricking the DRM checks into running completely offline.
+                    </p>
+
+                    <div class="visual-diagram"
+                        style="display: flex; flex-direction: column; gap: 1.2rem; margin: 1.5rem 0;">
+                        <div class="diagram-node">
+                            <div class="node-number">1</div>
+                            <div class="node-content">
+                                <h4>BIOS Virtualization (Intel VT-x / AMD-V)</h4>
+                                <p>Virtualization instruction sets must be active in BIOS so the custom hypervisor
+                                    engine can run at root-privilege ring -1.</p>
+                            </div>
+                        </div>
+                        <div class="diagram-arrow" style="text-align: center; color: var(--text-dim);"><i
+                                class="fa-solid fa-arrow-down"></i></div>
+                        <div class="diagram-node">
+                            <div class="node-number">2</div>
+                            <div class="node-content">
+                                <h4>Custom Hypervisor Boot (VM Launcher)</h4>
+                                <p>The specialized bypassing launcher loads, placing itself underneath Windows before
+                                    booting the game binary.</p>
+                            </div>
+                        </div>
+                        <div class="diagram-arrow" style="text-align: center; color: var(--text-dim);"><i
+                                class="fa-solid fa-arrow-down"></i></div>
+                        <div class="diagram-node">
+                            <div class="node-number">3</div>
+                            <div class="node-content">
+                                <h4>DRM Call Interception & Spoofing</h4>
+                                <p>Whenever Denuvo queries hardware IDs, registry licenses, or anti-cheat callbacks, the
+                                    hypervisor intercepts these and injects legitimate answers.</p>
+                            </div>
+                        </div>
+                        <div style="font-size: 1rem; text-align: center; color: var(--text-dim); margin-top: 1rem;"><i
+                                class="fa-solid fa-circle-check" style="color: var(--status-cracked);"></i> Offline
+                            Bypass Completed</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <!-- Hardware Requirements -->
+                    <div class="protection-panel"
+                        style="background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1.5rem;">
+                        <h2 style="font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 1.2rem;"><i
+                                class="fa-solid fa-list-check" style="color: var(--accent-blue);"></i> BIOS Setup
+                            Instructions</h2>
+                        <div class="instructions-list">
+                            <div class="instruction-step">
+                                <div><strong>Step 1:</strong> Reboot PC and press motherboard key (usually Del, F2, F10)
+                                    to access BIOS.</div>
+                            </div>
+                            <div class="instruction-step">
+                                <div><strong>Step 2:</strong> Go to CPU settings/Advanced tabs and set <strong>SVM
+                                        Mode</strong> (AMD) or <strong>Intel Virtualization Technology</strong> (Intel)
+                                    to <strong>Enabled</strong>.</div>
+                            </div>
+                            <div class="instruction-step">
+                                <div><strong>Step 3:</strong> Save changes (F10) & Boot back to Windows.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Environment Check Mock Tool -->
+                    <div class="protection-panel"
+                        style="background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1.5rem;">
+                        <h2 style="font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 1.2rem;"><i
+                                class="fa-solid fa-terminal" style="color: var(--accent-pink);"></i> VM Environment
+                            Check</h2>
+
+                        <div class="progress-bar-container" id="section-bar-outer"
+                            style="width: 100%; height: 5px; background: var(--bg-primary); border-radius: 3px; display: none; margin-bottom: 0.8rem; overflow: hidden;">
+                            <div class="progress-bar-fill" id="section-bar-inner"
+                                style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue)); transition: width 0.1s ease;">
+                            </div>
+                        </div>
+
+                        <div class="tester-console" id="section-terminal"
+                            style="background: #050608; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 0.8rem; font-family: monospace; font-size: 0.75rem; height: 120px; overflow-y: auto; color: #38bdf8; margin-bottom: 1rem; line-height: 1.4;">
+                            <div class="console-line line-info">&gt; Standing by. Run environment diagnostics scan...
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-full-width btn-small"
+                            id="btn-section-run-diag">
+                            <i class="fa-solid fa-play"></i> Run Environment Check
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Detailed Game Modal -->
@@ -445,6 +559,9 @@
                     <li><a href="#cracks" onclick="tabNavigation('cracks')">Cracks Catalog</a></li>
                     <li><a href="#releases" onclick="tabNavigation('releases')">Release Calendar</a></li>
                     <li><a href="#freebies" onclick="tabNavigation('freebies')">Epic/Steam Freebies</a></li>
+                    <li><a href="#hypervisor" onclick="tabNavigation('hypervisor')"
+                            style="color: var(--accent-blue); font-weight: 600;"><i class="fa-solid fa-microchip"></i>
+                            Hypervisor Guide</a></li>
                 </ul>
             </div>
 
@@ -470,8 +587,8 @@
     </footer>
 
     <!-- JS Scripts -->
-    <script src="gamesData.js?v=2.7"></script>
-    <script src="app.js?v=2.7"></script>
+    <script src="gamesData.js?v=4.8"></script>
+    <script src="app.js?v=4.8"></script>
 </body>
 
 </html>

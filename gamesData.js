@@ -812,6 +812,36 @@ const GAMES_DATA = {
                 torrent: "",
                 direct: ""
             }
+        },
+        {
+            id: "sand-raiders-of-sophie",
+            title: "SAND: Raiders of Sophie",
+            bgClass: "card-sand",
+            imgUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1431300/header.jpg",
+            category: "Shooter",
+            releaseDate: "2026-06-22",
+            crackDate: "Pending",
+            crackStatus: "Uncracked",
+            crackGroup: "None",
+            sizeRepack: "-",
+            sizeOriginal: "28.0 GB",
+            rating: 7.8,
+            developer: "Hologryph",
+            repackVersion: "No Repack Available Yet",
+            description: "SAND is a PvPvE extraction shooter where you traverse a fallen world inside giant walking dreadnoughts, seeking hidden treasures in an evaporating sea.",
+            requirements: {
+                minimum: "OS: Windows 10/11 | CPU: Intel i5-9600K | RAM: 16 GB | GPU: GTX 1070 | Storage: 30 GB SSD",
+                recommended: "OS: Windows 10/11 | CPU: Intel i7-11700K | RAM: 16 GB | GPU: RTX 3070 | Storage: 30 GB SSD"
+            },
+            features: [
+                "Online PvPvE extraction shooter gameplay",
+                "Requires network authorization, currently uncracked"
+            ],
+            downloads: {
+                magnet: "",
+                torrent: "",
+                direct: ""
+            }
         }
     ],
 
@@ -1288,7 +1318,17 @@ const GAMES_DATA = {
         ["Kerbal Space Program", 220200, "Simulation", "Squad", "4 GB", "GOG"],
         ["Kerbal Space Program 2", 954850, "Simulation", "Intercept Games", "45 GB", "RUNE"],
         ["Construction Simulator", 1273400, "Simulation", "weltenbauer.", "25 GB", "RUNE"],
-        ["Goat Simulator 3", 1420160, "Simulation", "Coffee Stain North", "12 GB", "RUNE"]
+        ["Goat Simulator 3", 1420160, "Simulation", "Coffee Stain North", "12 GB", "RUNE"],
+        ["Sand Land", 1979440, "RPG", "ILCA, Inc.", "19 GB", "RUNE"],
+        ["FIFA 23", 1811260, "Simulation", "EA Sports", "50 GB", "MKDEV"],
+        ["FIFA 22", 1506830, "Simulation", "EA Sports", "45 GB", "MKDEV"],
+        ["EA Sports FC 24", 2195250, "Simulation", "EA Sports", "48 GB", "Hypervisor"],
+        ["EA Sports FC 25", 2669320, "Simulation", "EA Sports", "50 GB", "Hypervisor"],
+        ["EA Sports FC 26", 3405690, "Simulation", "EA Sports", "52 GB", "Hypervisor"],
+        ["Cricket 19", 1028630, "Simulation", "Big Ant Studios", "15 GB", "CODEX"],
+        ["Cricket 22", 1498440, "Simulation", "Big Ant Studios", "25 GB", "FLT"],
+        ["Cricket 24", 2358260, "Simulation", "Big Ant Studios", "30 GB", "RUNE"],
+        ["Cricket 26", 3468650, "Simulation", "Big Ant Studios", "35 GB", "RUNE"]
     ];
 
     const allSeeds = [...seeds, ...extraSeeds];
@@ -1311,7 +1351,10 @@ const GAMES_DATA = {
             id: slug,
             title: title,
             bgClass: "card-seeded",
-            imgUrl: `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
+            imgUrl: title.includes("FC 26") ? "fc26_header.jpg"
+                : title.includes("Cricket 22") ? "cricket22_header.jpg"
+                    : title.includes("Cricket 26") ? "cricket26_header.jpg"
+                        : `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
             category: cat,
             releaseDate: "2022-01-01",
             crackDate: isCracked ? "2022-01-02" : "Pending",
@@ -1339,4 +1382,12 @@ const GAMES_DATA = {
             }
         });
     });
+
+    // === Post-loop overrides for specific games ===
+    const cricket26Entry = GAMES_DATA.games.find(g => g.id === "cricket-26");
+    if (cricket26Entry) {
+        cricket26Entry.downloads.direct = "https://gamedrive.org/?s=Cricket+26";
+        cricket26Entry.crackDate = "2026-07-01";
+    }
+
 })();
