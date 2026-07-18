@@ -38,6 +38,25 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    if (urlPath === '/api/steam-featured') {
+        const steamApiUrl = "https://store.steampowered.com/api/featured/";
+        const https = require('https');
+        https.get(steamApiUrl, (apiRes) => {
+            let body = '';
+            res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            });
+            apiRes.on('data', (chunk) => { body += chunk; });
+            apiRes.on('end', () => { res.end(body); });
+        }).on('error', (e) => {
+            console.error(`Error fetching Steam featured: ${e.message}`);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: e.message }));
+        });
+        return;
+    }
+
     let filePath = path.join(__dirname, urlPath === '/' ? 'index.html' : urlPath);
 
     const extname = path.extname(filePath);
@@ -61,4 +80,32 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
+
+    // Auto-scheduler for catalog updates (Runs GameDrive and Steam scrapers)
+    const { exec } = require('child_process');
+    function runCatalogUpdates() {
+        console.log(`[${new Date().toISOString()}] Initiating background catalog sync...`);
+
+        exec('node scrape_gamedrive.js', (err, stdout, stderr) => {
+            if (err) {
+                console.error(`GameDrive Scraper Error: ${err.message}`);
+                return;
+            }
+            console.log("GameDrive catalog successfully refreshed.");
+        });
+
+        exec('node scrape_steam.js', (err, stdout, stderr) => {
+            if (err) {
+                console.error(`Steam Scraper Error: ${err.message}`);
+                return;
+            }
+            console.log("Steam storefront catalog successfully refreshed.");
+        });
+    }
+
+    // Run scraper sync on start
+    runCatalogUpdates();
+
+    // Schedule: Update every hour (3600000ms)
+    setInterval(runCatalogUpdates, 3600000);
 });

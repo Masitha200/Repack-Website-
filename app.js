@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initial State Variables
     let currentCategory = "all";
     let searchFilter = "";
+    let premiumSearchFilter = "";
+    let cachedSteamGames = null;
+    let premiumSteamGames = [];
     let sortBy = "recent";
     let displayedCount = 100; // Increased to show all games at once as requested
     const itemsPerLoad = 8;
@@ -19,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Dashboard DOM components
     const totalCrackedStat = document.getElementById("stat-total-cracked");
-    const bypassStat = document.getElementById("stat-bypass");
+    const premiumStat = document.getElementById("stat-premium");
     const upcomingStat = document.getElementById("stat-upcoming");
     const freeStat = document.getElementById("stat-free");
     const quickNewsFeed = document.getElementById("quick-news-feed");
@@ -36,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Premium Games DOM components
     const premiumGamesGrid = document.getElementById("premium-games-grid");
+    const premiumSearch = document.getElementById("premium-search");
 
     // Free Games DOM components
     const activeFreeGrid = document.getElementById("active-free-grid");
@@ -183,15 +187,24 @@ document.addEventListener("DOMContentLoaded", () => {
     function initDashboard() {
         // Calculate core stats
         const totalCracked = GAMES_DATA.games.filter(g => g.crackStatus === "Cracked").length;
-        const totalBypassed = GAMES_DATA.games.filter(g => g.crackStatus === "Bypass").length;
+
+        // Premium games count (excluding GameDrive repacks)
+        const localPremiumCount = GAMES_DATA.games.filter(game => {
+            if (game.id === "grand-theft-auto-vi" || game.title === "Grand Theft Auto VI") return false;
+            if (game.bgClass === "card-seeded") return false;
+            if (game.downloads && game.downloads.direct && game.downloads.direct.includes("gamedrive.org")) return false;
+            return true;
+        }).length;
+        const totalPremium = localPremiumCount + (premiumSteamGames ? premiumSteamGames.length : 0);
+
         const upcomingGamesCount = GAMES_DATA.releasesTimeline.filter(g => g.status === "Upcoming" || g.statusClass === "status-upcoming").length;
         const freeCount = GAMES_DATA.freeGames.filter(g => g.type === "active").length;
 
         // Set values in stats card (with animate numbering)
-        animateValue(totalCrackedStat, 0, totalCracked, 1000);
-        animateValue(bypassStat, 0, totalBypassed, 1000);
-        animateValue(upcomingStat, 0, upcomingGamesCount, 1200);
-        animateValue(freeStat, 0, freeCount, 800);
+        if (totalCrackedStat) animateValue(totalCrackedStat, parseInt(totalCrackedStat.innerHTML) || 0, totalCracked, 1000);
+        if (premiumStat) animateValue(premiumStat, parseInt(premiumStat.innerHTML) || 0, totalPremium, 1000);
+        if (upcomingStat) animateValue(upcomingStat, parseInt(upcomingStat.innerHTML) || 0, upcomingGamesCount, 1200);
+        if (freeStat) animateValue(freeStat, parseInt(freeStat.innerHTML) || 0, freeCount, 800);
 
         // News block rendering
         let newsHtml = "";
@@ -397,13 +410,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Global Header Search handler
     globalSearch.addEventListener("input", (e) => {
-        searchFilter = e.target.value;
-        cracksSearch.value = e.target.value; // Sync search fields
-        displayedCount = 8;
+        const query = e.target.value;
+        const currentActiveSec = Array.from(sections).find(sec => sec.classList.contains("active"));
 
-        // Route to cracks section
-        navigateToSection("cracks");
-        renderCracksCatalog();
+        if (currentActiveSec && currentActiveSec.id === "view-releases") {
+            premiumSearchFilter = query;
+            if (premiumSearch) {
+                premiumSearch.value = query;
+            }
+            initPremiumGames();
+        } else {
+            searchFilter = query;
+            cracksSearch.value = query; // Sync search fields
+            displayedCount = 8;
+
+            // Route to cracks section
+            if (currentActiveSec && currentActiveSec.id !== "view-cracks") {
+                navigateToSection("cracks");
+            }
+            renderCracksCatalog();
+        }
     });
 
     // Sort dropdown handler
@@ -462,6 +488,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Helper to calculate mock price for Steam games
     function getGamePrice(game) {
+        if (game.price) return game.price; // Use pre-defined price if available
         if (game.id === "black-myth-wukong") return "$59.99";
         if (game.id === "elden-ring-shadow") return "$39.99";
         if (game.id === "grand-theft-auto-v") return "$29.99";
@@ -527,15 +554,165 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function initPremiumGames() {
         if (!premiumGamesGrid) return;
-        let premiumGridHtml = "";
 
-        GAMES_DATA.games.forEach(game => {
+        // 1. Filter out GameDrive games from our local database
+        const localPremium = GAMES_DATA.games.filter(game => {
             if (game.id === "grand-theft-auto-vi" || game.title === "Grand Theft Auto VI") {
-                return;
+                return false;
             }
-            premiumGridHtml += generatePremiumGameCardHtml(game);
+            // Do not show scraped GameDrive repacks (bgClass is card-seeded or download matches gamedrive.org)
+            if (game.bgClass === "card-seeded") {
+                return false;
+            }
+            if (game.downloads && game.downloads.direct && game.downloads.direct.includes("gamedrive.org")) {
+                return false;
+            }
+            return true;
         });
-        premiumGamesGrid.innerHTML = premiumGridHtml;
+
+        // Helper function to render a combined list
+        const renderMergedGames = (steamList = []) => {
+            // Merge local AAA and Steam featured games, avoiding duplicates by title or appId
+            const merged = [...localPremium];
+            const seenTitles = new Set(localPremium.map(g => g.title.toLowerCase().trim()));
+            const seenAppIds = new Set(localPremium.map(g => {
+                let appId = g.appId;
+                if (!appId && g.imgUrl && g.imgUrl.includes("steam/apps/")) {
+                    const match = g.imgUrl.match(/\/apps\/(\d+)\//);
+                    if (match) appId = parseInt(match[1]);
+                }
+                return appId;
+            }).filter(Boolean));
+
+            steamList.forEach(sg => {
+                const titleLower = sg.title.toLowerCase().trim();
+                if (!seenTitles.has(titleLower) && !seenAppIds.has(sg.appId)) {
+                    merged.push(sg);
+                    seenTitles.add(titleLower);
+                    if (sg.appId) seenAppIds.add(sg.appId);
+                }
+            });
+
+            // Merge the 5,000+ scraped Steam games
+            premiumSteamGames.forEach(sg => {
+                const titleLower = sg.title.toLowerCase().trim();
+                if (!seenTitles.has(titleLower) && !seenAppIds.has(sg.appId)) {
+                    merged.push(sg);
+                    seenTitles.add(titleLower);
+                    if (sg.appId) seenAppIds.add(sg.appId);
+                }
+            });
+
+            // Filter by search term
+            const query = premiumSearchFilter.toLowerCase().trim();
+            const filtered = merged.filter(game => {
+                if (!query) return true;
+                const titleMatches = game.title.toLowerCase().includes(query);
+                const devMatches = game.developer ? game.developer.toLowerCase().includes(query) : false;
+                const catMatches = game.category ? game.category.toLowerCase().includes(query) : false;
+                return titleMatches || devMatches || catMatches;
+            });
+
+            // Slice output to avoid lagging the UI browser grid
+            const sliceLimit = 120;
+            const sliced = filtered.slice(0, sliceLimit);
+
+            // Render
+            if (filtered.length === 0) {
+                premiumGamesGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem 0; color: var(--text-muted);">
+                        <i class="fa-solid fa-face-frown" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <p>No premium games found matching your search.</p>
+                    </div>
+                `;
+            } else {
+                let premiumGridHtml = "";
+                sliced.forEach(game => {
+                    premiumGridHtml += generatePremiumGameCardHtml(game);
+                });
+
+                if (filtered.length > sliceLimit) {
+                    premiumGridHtml += `
+                        <div style="grid-column: 1/-1; text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.02); border-radius: 8px; border: 1px dashed rgba(244, 63, 94, 0.25); color: var(--text-muted);">
+                            <p><i class="fa-solid fa-circle-info" style="color: var(--accent-pink); margin-right: 8px;"></i> Showing top ${sliceLimit} of ${filtered.length} premium games. Use the search box above to narrow down your selection.</p>
+                        </div>
+                    `;
+                }
+
+                premiumGamesGrid.innerHTML = premiumGridHtml;
+            }
+        };
+
+        // If we already have cached Steam games, render immediately
+        if (cachedSteamGames !== null) {
+            renderMergedGames(cachedSteamGames);
+            return;
+        }
+
+        // Show a loading text only if we haven't rendered yet
+        if (!premiumGamesGrid.innerHTML || premiumGamesGrid.innerHTML.includes("Loading")) {
+            premiumGamesGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem 0; color: var(--text-dim);">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Loading live premium games from Steam Store...</p>
+                </div>
+            `;
+        }
+
+        // Fetch live featured games from the Steam API proxy
+        fetch('/api/steam-featured')
+            .then(res => {
+                if (!res.ok) throw new Error("Steam API error");
+                return res.json();
+            })
+            .then(data => {
+                const winGames = data?.featured_win || [];
+                const finalSteamGames = winGames.map(sg => {
+                    // Convert cents/pence price to human readable format
+                    let priceDisplay = "Buy Now";
+                    if (sg.final_price !== undefined) {
+                        const originalPriceFormatted = sg.original_price ? `$${(sg.original_price / 100).toFixed(2)}` : "";
+                        const finalPriceFormatted = `$${(sg.final_price / 100).toFixed(2)}`;
+                        if (sg.discounted) {
+                            priceDisplay = `<span style="text-decoration: line-through; color: var(--text-dim); margin-right: 6px;">${originalPriceFormatted}</span><span>${finalPriceFormatted}</span>`;
+                        } else {
+                            priceDisplay = finalPriceFormatted;
+                        }
+                    }
+                    return {
+                        id: `steam-${sg.id}`,
+                        title: sg.name,
+                        imgUrl: sg.header_image || sg.large_capsule_image || sg.small_capsule_image,
+                        rating: parseFloat((8.0 + (sg.id % 20) / 10).toFixed(1)), // mock rating based on id
+                        category: sg.discounted ? `Special Offer` : `Featured`,
+                        developer: "Steam Store Official Lineup",
+                        price: priceDisplay,
+                        appId: sg.id,
+                        bgClass: "card-elden"
+                    };
+                });
+
+                cachedSteamGames = finalSteamGames;
+                showToast("✅ Loaded live premium storefront catalog from Steam!", "success");
+                renderMergedGames(cachedSteamGames);
+            })
+            .catch(err => {
+                console.error("Steam store API unavailable, using local fallback list:", err);
+                // Fallback: render without steam games (local premium list only)
+                cachedSteamGames = [];
+                renderMergedGames([]);
+            });
+    }
+
+    if (premiumSearch) {
+        premiumSearch.addEventListener("input", (e) => {
+            premiumSearchFilter = e.target.value;
+            // Sync with globalSearch header input silently
+            if (globalSearch) {
+                globalSearch.value = e.target.value;
+            }
+            initPremiumGames();
+        });
     }
 
     window.requestVoteUncracked = function (gameName) {
@@ -843,47 +1020,16 @@ document.addEventListener("DOMContentLoaded", () => {
         let downloadMirrorsHtml = "";
         let downloadButtonsHtml = "";
         if (isCracked) {
-            const cleanSearchTitle = game.title.replace(/\s*\([^)]*\)/g, "").trim();
             downloadMirrorsHtml = `
-                <h3 class="mirrors-title"><i class="fa-solid fa-cloud-arrow-down color-success"></i> Download Mirrors & Repackers</h3>
-                <div class="mirrors-grid">
-                    <a href="https://fitgirl-repacks.site/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="mirror-card">
+                <h3 class="mirrors-title"><i class="fa-solid fa-cloud-arrow-down color-success"></i> Download Mirrors</h3>
+                <div class="mirrors-grid" style="grid-template-columns: 1fr;">
+                    <a href="${game.downloads.direct}" target="_blank" class="mirror-card" style="border-color: #10b981; background: rgba(16, 185, 129, 0.05);">
                         <div class="mirror-info">
-                            <span class="mirror-source">FitGirl Repacks</span>
-                            <span class="mirror-type">Lossless Repack</span>
+                            <span class="mirror-source">GameDrive.org</span>
+                            <span class="mirror-type">Direct Download & Repacks</span>
                         </div>
-                        <i class="fa-solid fa-globe mirror-icon"></i>
+                        <i class="fa-solid fa-globe mirror-icon" style="color: #10b981;"></i>
                     </a>
-                    <a href="https://dodi-repacks.site/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="mirror-card">
-                        <div class="mirror-info">
-                            <span class="mirror-source">DODI Repacks</span>
-                            <span class="mirror-type">Highly Compressed</span>
-                        </div>
-                        <i class="fa-solid fa-globe mirror-icon"></i>
-                    </a>
-                    <a href="https://steamrip.com/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="mirror-card">
-                        <div class="mirror-info">
-                            <span class="mirror-source">SteamRIP</span>
-                            <span class="mirror-type">Pre-installed GOG/Steam</span>
-                        </div>
-                        <i class="fa-solid fa-circle-down mirror-icon"></i>
-                    </a>
-                    ${game.downloads.direct && game.downloads.direct !== "" ? `
-                    <a href="${game.downloads.direct.includes('neoplay_') ? `https://steamrip.com/?s=${encodeURIComponent(cleanSearchTitle)}` : game.downloads.direct}" target="_blank" class="mirror-card" onclick="if('${game.downloads.direct}'.includes('neoplay_')) showToast('Redirecting to high-speed SteamRIP DDL mirrors...');">
-                        <div class="mirror-info">
-                            <span class="mirror-source">Direct Download</span>
-                            <span class="mirror-type">Direct High-Speed DDL</span>
-                        </div>
-                        <i class="fa-solid fa-cloud-arrow-down mirror-icon"></i>
-                    </a>` : ''}
-                    ${game.downloads.magnet && game.downloads.magnet !== "" ? `
-                    <a href="${game.downloads.magnet.includes('repack') ? `https://1337x.to/sort-search/${encodeURIComponent(cleanSearchTitle)}/seeders/desc/1/` : game.downloads.magnet}" target="_blank" class="mirror-card" onclick="if('${game.downloads.magnet}'.includes('repack')) { showToast('Searching torrent trackers for active seeds...'); } else { showToast('Copying magnet link to clipboard...'); navigator.clipboard.writeText('${game.downloads.magnet}'); }">
-                        <div class="mirror-info">
-                            <span class="mirror-source">Magnet Torrent</span>
-                            <span class="mirror-type">Torrent Tracker Search</span>
-                        </div>
-                        <i class="fa-solid fa-magnet mirror-icon"></i>
-                    </a>` : ''}
                 </div>
             `;
             if (game.crackGroup === "Hypervisor") {
@@ -898,8 +1044,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
             }
             downloadButtonsHtml = `
-                <a href="https://dodi-repacks.site/?s=${encodeURIComponent(cleanSearchTitle)}" target="_blank" class="btn btn-primary">
-                    <i class="fa-solid fa-circle-arrow-down"></i> Quick Repack Search
+                <a href="${game.downloads.direct}" target="_blank" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                    <i class="fa-solid fa-circle-arrow-down"></i> Download on GameDrive
                 </a>
                 <button class="btn btn-outline" onclick="closeModal()">Close Detail</button>
             `;
@@ -1072,17 +1218,51 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function initializeAll() {
+    async function initializeAll() {
         // Load historically cracked games from localStorage first to prevent notification spam
         const crackedIds = JSON.parse(localStorage.getItem("neoplay_cracked_ids")) || [];
         if (crackedIds.length > 0 && GAMES_DATA.upcomingAutoCracks) {
             for (let i = GAMES_DATA.upcomingAutoCracks.length - 1; i >= 0; i--) {
                 const game = GAMES_DATA.upcomingAutoCracks[i];
                 if (crackedIds.includes(game.id)) {
-                    GAMES_DATA.games.unshift(game);
-                    GAMES_DATA.upcomingAutoCracks.splice(i, 1);
+                    GAMES_DATA.games.push(game); // Push historically cracked to main array if wasn't there
+                    const upcomingIdx = GAMES_DATA.upcomingAutoCracks.findIndex(g => g.id === game.id);
+                    if (upcomingIdx > -1) {
+                        GAMES_DATA.upcomingAutoCracks.splice(upcomingIdx, 1);
+                    }
                 }
             }
+        }
+
+        // Fetch scraped GameDrive games
+        try {
+            const res = await fetch('/gamedrive_scraped_games.json');
+            if (res.ok) {
+                const scrapedGames = await res.json();
+                const existingIds = new Set(GAMES_DATA.games.map(g => g.id));
+                scrapedGames.forEach(game => {
+                    if (!existingIds.has(game.id)) {
+                        GAMES_DATA.games.push(game);
+                    }
+                });
+                renderCracksCatalog();
+                initDashboard(); // Recalculate stats with the loaded cracked games
+            }
+        } catch (e) {
+            console.error("Error loading scraped gamedrive games:", e);
+        }
+
+        // Fetch scraped Steam premium games
+        try {
+            const res = await fetch('/steam_scraped_games.json');
+            if (res.ok) {
+                premiumSteamGames = await res.json();
+                console.log(`Loaded ${premiumSteamGames.length} premium Steam games dynamically.`);
+                initPremiumGames();
+                initDashboard(); // Recalculate stats with the loaded premium games
+            }
+        } catch (e) {
+            console.error("Error loading scraped steam games:", e);
         }
 
         initLiveTicker();

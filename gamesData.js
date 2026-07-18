@@ -1461,4 +1461,28 @@ const GAMES_DATA = {
         shadowsEntry.crackDate = "2026-07-17";
     }
 
+    // Sanitize all cracked games to only keep the GameDrive direct link
+    GAMES_DATA.games.forEach(game => {
+        if (game.crackStatus === "Cracked" || game.crackStatus === "Bypass") {
+            const cleanSearchTitle = game.title.replace(/\s*\([^)]*\)/g, "").trim();
+            const isScrapedGD = game.downloads.direct && game.downloads.direct.startsWith("https://gamedrive.org/");
+            game.downloads = {
+                magnet: "",
+                torrent: "",
+                direct: isScrapedGD ? game.downloads.direct : `https://gamedrive.org/?s=${encodeURIComponent(cleanSearchTitle)}`
+            };
+        }
+    });
+
+    GAMES_DATA.upcomingAutoCracks.forEach(game => {
+        if (game.crackStatus === "Cracked" || game.crackStatus === "Bypass") {
+            const cleanSearchTitle = game.title.replace(/\s*\([^)]*\)/g, "").trim();
+            game.downloads = {
+                magnet: "",
+                torrent: "",
+                direct: `https://gamedrive.org/?s=${encodeURIComponent(cleanSearchTitle)}`
+            };
+        }
+    });
+
 })();
