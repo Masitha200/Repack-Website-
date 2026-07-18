@@ -1399,14 +1399,14 @@ const GAMES_DATA = {
             appId: appId,
             title: title,
             bgClass: "card-seeded",
-            imgUrl: title.includes("Far Cry 6") ? "fc6_header.png"
-                : title.includes("Mirage") ? "mirage_header.png"
-                    : title.includes("Shadows") ? "shadows_header.png"
-                        : title.includes("FC 26") ? "fc26_header.jpg"
-                            : title.includes("Cricket 22") ? "cricket22_header.jpg"
-                                : title.includes("Cricket 26") ? "cricket26_header.jpg"
-                                    : title.includes("Planet Crafter") ? "planet_crafter_header.jpg"
-                                        : title.includes("Grand Theft Auto VI") ? "gta6_header.jpg"
+            imgUrl: title.includes("Far Cry 6") ? "assets/images/fc6_header.png"
+                : title.includes("Mirage") ? "assets/images/mirage_header.png"
+                    : title.includes("Shadows") ? "assets/images/shadows_header.png"
+                        : title.includes("FC 26") ? "assets/images/fc26_header.jpg"
+                            : title.includes("Cricket 22") ? "assets/images/cricket22_header.jpg"
+                                : title.includes("Cricket 26") ? "assets/images/cricket26_header.jpg"
+                                    : title.includes("Planet Crafter") ? "assets/images/planet_crafter_header.jpg"
+                                        : title.includes("Grand Theft Auto VI") ? "assets/images/gta6_header.jpg"
                                             : `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
             category: cat,
             releaseDate: "2022-01-01",
